@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Cambios de Servicio Online</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",system-ui,sans-serif;background:#f0f0f0;color:#1e2532;font-size:12px}
+header{background:#14532d;padding:10px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.3);flex-wrap:wrap}
+header h1{font-size:14px;font-weight:600;color:#fff}
+header span{font-size:11px;color:#9ca3af;margin-left:auto}
+#upload-section{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 45px)}
+.drop{border:2px dashed #c4c9d8;border-radius:14px;padding:48px 40px;text-align:center;background:#fff;cursor:pointer;transition:all .15s;max-width:440px;width:100%}
+.drop:hover,.drop.drag{border-color:#2563eb;background:#eff4ff}
+.drop svg{opacity:.35;margin-bottom:14px}
+.drop p{color:#6b7280;font-size:13px;line-height:1.7}
+.drop strong{color:#2563eb}
+.drop small{color:#9ca3b0;font-size:11px;display:block;margin-top:8px}
+#file-input{display:none}
+
+/* ── toolbar ── */
+.controls{background:#fff;border-bottom:1px solid #d1d5db;padding:7px 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;position:sticky;top:0;z-index:20;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.lbl{font-size:10px;color:#6b7280;font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
+.sep{width:1px;height:22px;background:#e5e7eb;flex-shrink:0}
+.months{display:flex;flex-wrap:wrap;gap:4px}
+.mbtn{font-size:11px;padding:2px 10px;border-radius:3px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;user-select:none;color:#374151;transition:all .1s}
+.mbtn:hover{background:#e5e7eb}
+.mbtn.on{background:#14532d;color:#fff;border-color:#14532d}
+.tipo-wrap{display:flex;gap:4px}
+.actions{margin-left:auto;display:flex;gap:5px;align-items:center}
+.btn{font-size:11px;padding:4px 12px;border-radius:3px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;color:#374151;white-space:nowrap}
+.btn:hover{background:#e5e7eb}
+.btn.excel{background:#217346;color:#fff;border-color:#1a5c38}
+.btn.excel:hover{background:#1a5c38}
+.btn.ghost{color:#9ca3b0;border-color:#e5e7eb}
+.btn.meta{background:#2563eb;color:#fff;border-color:#1d4ed8;text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:4px 10px}
+.btn.meta:hover{background:#1d4ed8}
+.btn.clear-filters{background:#fef3c7;color:#92400e;border-color:#fcd34d;font-weight:600}
+.btn.clear-filters:hover{background:#fde68a}
+
+/* texto buscado highlight */
+mark{background:#fef08a;color:#713f12;border-radius:2px;padding:0 1px}
+
+/* filtro texto */
+.txt-filter{font-size:11px;padding:3px 7px;border:1px solid #d1d5db;border-radius:3px;font-family:inherit;color:#374151;background:#f9fafb}
+.txt-filter:focus{outline:none;border-color:#2563eb;background:#fff}
+
+/* exclusión */
+.excl-wrap{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+#excl-input{font-size:11px;padding:3px 7px;border:1px solid #d1d5db;border-radius:3px;width:90px;font-family:inherit}
+#excl-input:focus{outline:none;border-color:#2563eb}
+.excl-tag{display:inline-flex;align-items:center;gap:2px;background:#fee2e2;color:#991b1b;border-radius:3px;padding:1px 6px;font-size:10px;font-weight:600}
+.excl-tag button{background:none;border:none;cursor:pointer;color:#991b1b;font-size:11px;padding:0;line-height:1;margin-left:1px}
+
+/* stats */
+.stats{font-size:11px;color:#6b7280;padding:4px 12px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:8px}
+.stats-count{font-weight:700;color:#14532d}
+
+/* ── tabla estilo spreadsheet ── */
+.wrap{overflow:auto;max-height:calc(100vh - 115px)}
+table{border-collapse:collapse;width:max-content;min-width:100%}
+
+thead th{
+  position:sticky;top:0;z-index:10;
+  background:#14532d;
+  color:#e5e7eb;
+  padding:7px 10px;
+  text-align:left;
+  font-size:10px;font-weight:600;
+  border-right:1px solid #166534;
+  border-bottom:2px solid #166534;
+  white-space:nowrap;
+  cursor:pointer;
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  user-select:none;
+}
+thead th:last-child{border-right:none}
+thead th:hover{background:#166534}
+thead th .s{margin-left:4px;opacity:.5;font-size:9px}
+thead th.asc .s::after{content:"▲"}
+thead th.desc .s::after{content:"▼"}
+thead th:not(.asc):not(.desc) .s::after{content:"▼";opacity:.25}
+
+tbody tr:nth-child(even) td{background:#f9fafb}
+tbody tr:nth-child(odd) td{background:#fff}
+tbody tr:hover td{background:#dbeafe!important}
+
+tbody td{
+  padding:5px 10px;
+  border-bottom:1px solid #e5e7eb;
+  border-right:1px solid #f3f4f6;
+  white-space:nowrap;
+  max-width:320px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  vertical-align:middle;
+  color:#111827;
+  font-size:11px;
+}
+tbody td:last-child{border-right:none}
+tbody td.archivo{
+  min-width:160px;
+  max-width:280px;
+  overflow:visible;
+  white-space:normal;
+}
+tbody td.archivo span[contenteditable]{
+  display:block;
+  outline:none;
+  white-space:pre-wrap;
+  word-break:break-word;
+  border-radius:2px;
+  padding:1px 2px;
+  cursor:text;
+  background:transparent;
+}
+tbody td.archivo span[contenteditable]:hover{background:rgba(0,0,0,.04);}
+tbody td.archivo span[contenteditable]:focus{background:#fefce8;box-shadow:0 0 0 2px #ca8a04;}
+</style>
+</head>
+<body>
+<header>
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+  <h1>Control de Cambios de Servicio Online</h1>
+  <span id="hdr-sub">Sube el CSV para comenzar</span>
+  <span id="hdr-saved" style="display:none;font-size:10px;color:#86efac;margin-left:8px">● CSV guardado localmente</span>
+</header>
+
+<div id="upload-section">
+  <div class="drop" id="drop-zone">
+    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    <p>Arrastra el CSV aquí o<br><strong>haz clic para seleccionarlo</strong></p>
+    <small>CSV exportado desde Metabase</small>
+  </div>
+  <input type="file" id="file-input" accept=".csv">
+</div>
+
+<div id="main-section" style="display:none">
+  <div class="controls">
+    <!-- Mes -->
+    <span class="lbl">Mes</span>
+    <div class="months" id="months"></div>
+
+    <div class="sep"></div>
+
+    <!-- Tipo -->
+    <span class="lbl">Tipo</span>
+    <div class="tipo-wrap" id="tipo-wrap">
+      <span class="mbtn on" data-tipo="ALL">Todos</span>
+      <span class="mbtn" data-tipo="TIENDA">Tienda</span>
+      <span class="mbtn" data-tipo="COLMENA">Colmena</span>
+    </div>
+
+    <div class="sep"></div>
+
+    <!-- Movimiento -->
+    <span class="lbl">Movimiento</span>
+    <select id="f-mov" class="txt-filter" style="cursor:pointer">
+      <option value="">Todos</option>
+    </select>
+
+    <div class="sep"></div>
+
+    <!-- Filtro Centro -->
+    <span class="lbl">Centro</span>
+    <input type="text" id="f-centro" class="txt-filter" placeholder="Código…" style="width:80px" title="Filtra por código de centro (contiene)">
+
+    <div class="sep"></div>
+
+    <!-- Filtro Descripción Movimiento -->
+    <span class="lbl">Descripción</span>
+    <input type="text" id="f-desc" class="txt-filter" placeholder="Buscar texto…" style="width:130px" title="Busca por texto en la descripción del movimiento (p.ej. código postal)">
+
+    <div class="sep"></div>
+
+    <!-- Excluir centros -->
+    <span class="lbl">Excluir</span>
+    <div class="excl-wrap" id="excl-wrap">
+      <input type="text" id="excl-input" placeholder="Código centro…" title="Escribe un código y pulsa Enter">
+      <div id="excl-tags"></div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="actions">
+      <button class="btn clear-filters" id="btn-clear" title="Limpiar todos los filtros activos">✕ Limpiar filtros</button>
+      <button class="btn ghost" id="btn-update" style="display:none" title="Sustituir por un CSV nuevo manteniendo la sesión">↺ Actualizar CSV</button>
+      <a class="btn meta" href="https://metabase.prod.monline/question/32892-control-de-cambios" target="_blank" title="Abrir consulta en Metabase">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        Metabase
+      </a>
+      <button class="btn excel" id="btn-export">⬇ Exportar Excel</button>
+    </div>
+  </div>
+
+  <div class="stats" id="stats"></div>
+  <div class="wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script>
+var COLS = [
+  {label:'MES',          src:'mes'},
+  {label:'CENTRO',       src:'mercadona_code'},
+  {label:'DENOMINACIÓN', src:'denominacion'},
+  {label:'POBLACIÓN',    src:'poblacion'},
+  {label:'PROVINCIA',    src:'provincia'},
+  {label:'ZONA',         src:'zona'},
+  {label:'MOVIMIENTO',   src:'movimiento'},
+  {label:'DESCRIPCIÓN MOVIMIENTO', src:'descripcion_movimiento'},
+  {label:'FECHA 1ER SERVICIO', src:'fecha_servicio'},
+  {label:'ARCHIVOS',     src:'archivo', calc:true},
+];
+
+var MONTH_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
+  'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+
+var allRows=[], activeMonth='ALL', activeTipo='ALL', activeMovimiento='',
+    filterCentro='', filterDesc='',
+    excludedCentros=[], sortColIdx=null, sortDir=1;
+
+// ── Parser CSV ─────────────────────────────────────────────────────────────
+function parseCSV(text){
+  var rows=[],row=[],field='',inQ=false;
+  for(var i=0;i<text.length;i++){
+    var c=text[i];
+    if(inQ){
+      if(c==='"'){if(text[i+1]==='"'){field+='"';i++;}else inQ=false;}
+      else field+=c;
+    }else{
+      if(c==='"') inQ=true;
+      else if(c===','){row.push(field);field='';}
+      else if(c==='\n'){row.push(field);field='';rows.push(row);row=[];}
+      else if(c!=='\r') field+=c;
+    }
+  }
+  if(field||row.length){row.push(field);rows.push(row);}
+  return rows;
+}
+
+function csvToObjects(text){
+  var raw=parseCSV(text);
+  if(!raw.length) return [];
+  var headers=raw[0].map(function(h){return h.trim();});
+  var result=[];
+  for(var i=1;i<raw.length;i++){
+    var r=raw[i];
+    if(!r||r.length<2) continue;
+    var obj={};
+    headers.forEach(function(h,j){obj[h]=(r[j]||'').trim();});
+    if(obj['archivo']) obj['archivo']=obj['archivo'].replace(/\\n/g,'\n');
+    if(!obj['mercadona_code']&&!obj['mes']) continue;
+    result.push(obj);
+  }
+  return result;
+}
+
+function getVal(row,col){return row[col.src]||'';}
+
+function filtered(){
+  var descLower = filterDesc.trim().toLowerCase();
+  var centroLower = filterCentro.trim().toLowerCase();
+  var d=allRows.filter(function(r){
+    if(activeMonth!=='ALL' && r['mes']!==activeMonth) return false;
+    if(activeTipo!=='ALL' && (r['tipo_centro']||'').toUpperCase()!==activeTipo) return false;
+    if(activeMovimiento && r['movimiento']!==activeMovimiento) return false;
+    if(centroLower && (r['mercadona_code']||'').toLowerCase().indexOf(centroLower)===-1) return false;
+    if(descLower && (r['descripcion_movimiento']||'').toLowerCase().indexOf(descLower)===-1) return false;
+    if(excludedCentros.length && excludedCentros.indexOf((r['mercadona_code']||'').trim())!==-1) return false;
+    return true;
+  });
+  if(sortColIdx!==null){
+    var col=COLS[sortColIdx];
+    d=d.slice().sort(function(a,b){
+      return String(getVal(a,col)).localeCompare(String(getVal(b,col)),'es',{numeric:true})*sortDir;
+    });
+  }
+  return d;
+}
+
+function hasActiveFilters(){
+  return activeMonth!=='ALL' || activeTipo!=='ALL' || activeMovimiento ||
+         filterCentro.trim() || filterDesc.trim() || excludedCentros.length;
+}
+
+function buildMonths(){
+  var el=document.getElementById('months');
+  var seen={},months=[];
+  allRows.forEach(function(r){var m=r['mes'];if(m&&!seen[m]){seen[m]=1;months.push(m);}});
+  months.sort(function(a,b){return(MONTH_ORDER.indexOf(a)+99)%99-(MONTH_ORDER.indexOf(b)+99)%99;});
+  el.innerHTML='';
+  function mk(lbl,val){
+    var b=document.createElement('span');
+    b.className='mbtn'+(val===activeMonth?' on':'');
+    b.textContent=lbl;b.dataset.m=val;
+    b.onclick=function(){activeMonth=val;document.querySelectorAll('#months .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.m===val);});render();};
+    el.appendChild(b);
+  }
+  mk('Todos','ALL');
+  months.forEach(function(m){mk(m[0]+m.slice(1).toLowerCase(),m);});
+}
+
+function buildMovimientos(){
+  var sel=document.getElementById('f-mov');
+  var seen={}, movs=[];
+  allRows.forEach(function(r){var m=r['movimiento'];if(m&&!seen[m]){seen[m]=1;movs.push(m);}});
+  movs.sort(function(a,b){return a.localeCompare(b,'es');});
+  sel.innerHTML='<option value="">Todos</option>';
+  movs.forEach(function(m){
+    var o=document.createElement('option');
+    o.value=m;o.textContent=m[0]+m.slice(1).toLowerCase();
+    sel.appendChild(o);
+  });
+  sel.value=activeMovimiento;
+  sel.onchange=function(){activeMovimiento=sel.value;render();};
+}
+
+function buildTipo(){
+  document.querySelectorAll('#tipo-wrap .mbtn').forEach(function(btn){
+    btn.onclick=function(){
+      activeTipo=btn.dataset.tipo;
+      document.querySelectorAll('#tipo-wrap .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.tipo===activeTipo);});
+      render();
+    };
+  });
+}
+
+// ── Exclusión de centros ───────────────────────────────────────────────────
+function renderExclTags(){
+  var c=document.getElementById('excl-tags');
+  c.innerHTML='';
+  excludedCentros.forEach(function(code){
+    var t=document.createElement('span');
+    t.className='excl-tag';
+    t.innerHTML=code+'<button title="Quitar">×</button>';
+    t.querySelector('button').onclick=function(){
+      excludedCentros=excludedCentros.filter(function(x){return x!==code;});
+      renderExclTags();render();
+    };
+    c.appendChild(t);
+  });
+}
+
+document.getElementById('excl-input').addEventListener('keydown',function(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    var val=this.value.trim().toUpperCase();
+    if(val && excludedCentros.indexOf(val)===-1){
+      excludedCentros.push(val);
+      renderExclTags();render();
+    }
+    this.value='';
+  }
+});
+
+// Filtros de texto: centro y descripción
+document.getElementById('f-centro').addEventListener('input', function(){
+  filterCentro = this.value;
+  render();
+});
+document.getElementById('f-desc').addEventListener('input', function(){
+  filterDesc = this.value;
+  render();
+});
+
+// ── Highlight helper ──────────────────────────────────────────────────────
+function highlight(text, term){
+  if(!term) return text.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  var esc=text.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+  var termEsc=term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  return esc.replace(new RegExp('('+termEsc+')', 'gi'),'<mark>$1</mark>');
+}
+
+// ── Render tabla ──────────────────────────────────────────────────────────
+function render(){
+  var rows=filtered();
+  var total=allRows.length;
+  var parts=[];
+  if(activeMonth!=='ALL') parts.push(activeMonth[0]+activeMonth.slice(1).toLowerCase());
+  if(activeTipo!=='ALL') parts.push(activeTipo);
+  if(activeMovimiento) parts.push(activeMovimiento[0]+activeMovimiento.slice(1).toLowerCase());
+  if(filterCentro.trim()) parts.push('Centro: "'+filterCentro.trim()+'"');
+  if(filterDesc.trim()) parts.push('Desc: "'+filterDesc.trim()+'"');
+  if(excludedCentros.length) parts.push('Excluidos: '+excludedCentros.join(', '));
+
+  var statsEl=document.getElementById('stats');
+  statsEl.innerHTML='<span class="stats-count">'+rows.length+'</span>&nbsp;de '+total+' filas'+(parts.length?' &nbsp;·&nbsp; '+parts.join(' · '):'');
+
+  // Botón limpiar: visible sólo si hay filtros activos
+  document.getElementById('btn-clear').style.display = hasActiveFilters() ? 'inline-block' : 'none';
+
+  var descTerm = filterDesc.trim();
+
+  var thead=document.getElementById('thead');
+  thead.innerHTML='<tr>'+COLS.map(function(col,i){
+    var sc=sortColIdx===i;
+    return '<th class="'+(col.calc?'calc':'')+' '+(sc?(sortDir>0?'asc':'desc'):'')+'" data-i="'+i+'">'+col.label+'<span class="s"></span></th>';
+  }).join('')+'</tr>';
+  thead.querySelectorAll('th').forEach(function(th){
+    th.onclick=function(){var i=+th.dataset.i;if(sortColIdx===i)sortDir*=-1;else{sortColIdx=i;sortDir=1;}render();};
+  });
+
+  var tbody=document.getElementById('tbody');
+  tbody.innerHTML=rows.slice(0,5000).map(function(row){
+    return '<tr>'+COLS.map(function(col){
+      var v=getVal(row,col);
+      if(col.calc){
+        var esc=v.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+        return '<td class="archivo"><span contenteditable="true" data-src="'+col.src+'" data-code="'+(row['mercadona_code']||'')+'">'+esc+'</span></td>';
+      }
+      // Highlight en columna descripción
+      var cellHtml;
+      if(col.src==='descripcion_movimiento' && descTerm){
+        cellHtml=highlight(v, descTerm);
+      } else {
+        cellHtml=v.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+      }
+      return '<td title="'+v.replace(/\n/g,' | ').replace(/"/g,'&quot;')+'">'+cellHtml+'</td>';
+    }).join('')+'</tr>';
+  }).join('');
+
+  // Persistir ediciones en allRows
+  tbody.querySelectorAll('span[contenteditable]').forEach(function(span){
+    span.addEventListener('blur',function(){
+      var code=span.dataset.code;
+      var src=span.dataset.src;
+      var newVal=span.innerText;
+      allRows.forEach(function(r){
+        if((r['mercadona_code']||'')===code) r[src]=newVal;
+      });
+    });
+    span.addEventListener('keydown',function(e){
+      if(e.key==='Escape') span.blur();
+    });
+  });
+}
+
+// ── Limpiar todos los filtros ─────────────────────────────────────────────
+document.getElementById('btn-clear').onclick=function(){
+  activeMonth='ALL';
+  activeTipo='ALL';
+  activeMovimiento='';
+  filterCentro='';
+  filterDesc='';
+  excludedCentros=[];
+  document.getElementById('f-centro').value='';
+  document.getElementById('f-desc').value='';
+  document.getElementById('f-mov').value='';
+  document.querySelectorAll('#months .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.m==='ALL');});
+  document.querySelectorAll('#tipo-wrap .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.tipo==='ALL');});
+  renderExclTags();
+  render();
+};
+
+var STORAGE_KEY='cambios2026_csv';
+var STORAGE_NAME='cambios2026_name';
+
+function showSaved(name){
+  document.getElementById('hdr-saved').style.display='inline';
+  document.getElementById('btn-update').style.display='inline-block';
+}
+function hideSaved(){
+  document.getElementById('hdr-saved').style.display='none';
+  document.getElementById('btn-update').style.display='none';
+}
+
+// ── Carga fichero ─────────────────────────────────────────────────────────
+function initFromText(text, name){
+  allRows=csvToObjects(text);
+  document.getElementById('hdr-sub').textContent=allRows.length+' filas · '+name;
+  document.getElementById('upload-section').style.display='none';
+  document.getElementById('main-section').style.display='block';
+  activeMonth='ALL';activeTipo='ALL';activeMovimiento='';
+  filterCentro='';filterDesc='';
+  excludedCentros=[];sortColIdx=null;sortDir=1;
+  buildMonths();
+  buildTipo();
+  buildMovimientos();
+  renderExclTags();
+  render();
+  showSaved(name);
+}
+
+function loadFile(file){
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var text=e.target.result;
+    try{localStorage.setItem(STORAGE_KEY,text);localStorage.setItem(STORAGE_NAME,file.name);}catch(ex){}
+    initFromText(text, file.name);
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+// Recuperar CSV guardado al abrir la página
+(function(){
+  try{
+    var saved=localStorage.getItem(STORAGE_KEY);
+    var savedName=localStorage.getItem(STORAGE_NAME)||'CSV guardado';
+    if(saved) initFromText(saved, savedName);
+  }catch(ex){}
+})();
+
+var dz=document.getElementById('drop-zone');
+var fi=document.getElementById('file-input');
+dz.onclick=function(){fi.click();};
+fi.onchange=function(e){loadFile(e.target.files[0]);};
+dz.ondragover=function(e){e.preventDefault();dz.classList.add('drag');};
+dz.ondragleave=function(){dz.classList.remove('drag');};
+dz.ondrop=function(e){e.preventDefault();dz.classList.remove('drag');loadFile(e.dataTransfer.files[0]);};
+
+// Actualizar CSV: abre el selector sin salir de la vista
+var fiUpdate=document.createElement('input');
+fiUpdate.type='file';fiUpdate.accept='.csv';
+fiUpdate.onchange=function(e){loadFile(e.target.files[0]);fiUpdate.value='';};
+document.getElementById('btn-update').onclick=function(){fiUpdate.click();};
+
+// ── Exportar Excel con formato ────────────────────────────────────────────
+document.getElementById('btn-export').onclick=function(){
+  var rows=filtered();
+
+  var headers=COLS.map(function(c){return c.label;});
+  var data=[headers].concat(rows.map(function(row){
+    return COLS.map(function(col){
+      return getVal(row,col).replace(/\n/g,' | ');
+    });
+  }));
+
+  var ws=XLSX.utils.aoa_to_sheet(data);
+
+  var hdrStyle={
+    font:{bold:true,color:{rgb:'FFFFFF'},sz:10},
+    fill:{fgColor:{rgb:'14532D'}},
+    alignment:{horizontal:'center',vertical:'center',wrapText:false},
+    border:{bottom:{style:'medium',color:{rgb:'166534'}},right:{style:'thin',color:{rgb:'166534'}}}
+  };
+  var evenStyle={
+    fill:{fgColor:{rgb:'F9FAFB'}},font:{sz:10},
+    alignment:{vertical:'center',wrapText:true},
+    border:{bottom:{style:'thin',color:{rgb:'E5E7EB'}},right:{style:'thin',color:{rgb:'F3F4F6'}}}
+  };
+  var oddStyle={
+    fill:{fgColor:{rgb:'FFFFFF'}},font:{sz:10},
+    alignment:{vertical:'center',wrapText:true},
+    border:{bottom:{style:'thin',color:{rgb:'E5E7EB'}},right:{style:'thin',color:{rgb:'F3F4F6'}}}
+  };
+
+  var range=XLSX.utils.decode_range(ws['!ref']);
+  for(var R=range.s.r;R<=range.e.r;R++){
+    for(var C=range.s.c;C<=range.e.c;C++){
+      var addr=XLSX.utils.encode_cell({r:R,c:C});
+      if(!ws[addr]) ws[addr]={t:'s',v:''};
+      ws[addr].s=(R===0)?hdrStyle:(R%2===0)?evenStyle:oddStyle;
+    }
+  }
+
+  ws['!rows']=[{hpt:18}];
+  ws['!cols']=COLS.map(function(col){
+    var max=col.label.length;
+    rows.slice(0,300).forEach(function(r){
+      var v=getVal(r,col).replace(/\n/g,' | ');
+      if(v.length>max) max=v.length;
+    });
+    return {wch:Math.min(max+2,60)};
+  });
+
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Cambios Servicio Online');
+
+  var suffix='';
+  if(activeMonth!=='ALL') suffix+='_'+activeMonth;
+  if(activeTipo!=='ALL') suffix+='_'+activeTipo;
+  XLSX.writeFile(wb,'cambios_servicio_online'+suffix+'.xlsx');
+};
+</script>
+</body>
+</html>
