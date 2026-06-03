@@ -19,7 +19,7 @@ header span{font-size:11px;color:#9ca3af;margin-left:auto}
 .drop small{color:#9ca3b0;font-size:11px;display:block;margin-top:8px}
 #file-input{display:none}
 
-/* ── toolbar ── */
+/* toolbar */
 .controls{background:#fff;border-bottom:1px solid #d1d5db;padding:7px 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;position:sticky;top:0;z-index:20;box-shadow:0 1px 3px rgba(0,0,0,.08)}
 .lbl{font-size:10px;color:#6b7280;font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
 .sep{width:1px;height:22px;background:#e5e7eb;flex-shrink:0}
@@ -38,43 +38,34 @@ header span{font-size:11px;color:#9ca3af;margin-left:auto}
 .btn.meta:hover{background:#1d4ed8}
 .btn.clear-filters{background:#fef3c7;color:#92400e;border-color:#fcd34d;font-weight:600}
 .btn.clear-filters:hover{background:#fde68a}
+.btn.show-hidden{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;font-weight:600}
+.btn.show-hidden:hover{background:#ddd6fe}
 
-/* texto buscado highlight */
 mark{background:#fef08a;color:#713f12;border-radius:2px;padding:0 1px}
 
-/* filtro texto */
 .txt-filter{font-size:11px;padding:3px 7px;border:1px solid #d1d5db;border-radius:3px;font-family:inherit;color:#374151;background:#f9fafb}
 .txt-filter:focus{outline:none;border-color:#2563eb;background:#fff}
 
-/* exclusión */
 .excl-wrap{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
 #excl-input{font-size:11px;padding:3px 7px;border:1px solid #d1d5db;border-radius:3px;width:90px;font-family:inherit}
 #excl-input:focus{outline:none;border-color:#2563eb}
 .excl-tag{display:inline-flex;align-items:center;gap:2px;background:#fee2e2;color:#991b1b;border-radius:3px;padding:1px 6px;font-size:10px;font-weight:600}
 .excl-tag button{background:none;border:none;cursor:pointer;color:#991b1b;font-size:11px;padding:0;line-height:1;margin-left:1px}
 
-/* stats */
 .stats{font-size:11px;color:#6b7280;padding:4px 12px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:8px}
 .stats-count{font-weight:700;color:#14532d}
 
-/* ── tabla estilo spreadsheet ── */
 .wrap{overflow:auto;max-height:calc(100vh - 115px)}
 table{border-collapse:collapse;width:max-content;min-width:100%}
 
 thead th{
   position:sticky;top:0;z-index:10;
-  background:#14532d;
-  color:#e5e7eb;
-  padding:7px 10px;
-  text-align:left;
+  background:#14532d;color:#e5e7eb;
+  padding:7px 10px;text-align:left;
   font-size:10px;font-weight:600;
-  border-right:1px solid #166534;
-  border-bottom:2px solid #166534;
-  white-space:nowrap;
-  cursor:pointer;
-  letter-spacing:.04em;
-  text-transform:uppercase;
-  user-select:none;
+  border-right:1px solid #166534;border-bottom:2px solid #166534;
+  white-space:nowrap;cursor:pointer;letter-spacing:.04em;
+  text-transform:uppercase;user-select:none;
 }
 thead th:last-child{border-right:none}
 thead th:hover{background:#166534}
@@ -82,42 +73,40 @@ thead th .s{margin-left:4px;opacity:.5;font-size:9px}
 thead th.asc .s::after{content:"▲"}
 thead th.desc .s::after{content:"▼"}
 thead th:not(.asc):not(.desc) .s::after{content:"▼";opacity:.25}
+/* columna ocultar: no sortable */
+thead th.col-hide{cursor:default;text-align:center;width:28px;padding:4px 6px}
+thead th.col-hide:hover{background:#14532d}
 
 tbody tr:nth-child(even) td{background:#f9fafb}
 tbody tr:nth-child(odd) td{background:#fff}
 tbody tr:hover td{background:#dbeafe!important}
+tbody tr.row-hidden td{background:#fdf4ff!important;opacity:.45;}
+tbody tr.row-hidden:hover td{background:#ede9fe!important;opacity:.7;}
 
 tbody td{
-  padding:5px 10px;
-  border-bottom:1px solid #e5e7eb;
-  border-right:1px solid #f3f4f6;
-  white-space:nowrap;
-  max-width:320px;
-  overflow:hidden;
-  text-overflow:ellipsis;
-  vertical-align:middle;
-  color:#111827;
-  font-size:11px;
+  padding:5px 10px;border-bottom:1px solid #e5e7eb;border-right:1px solid #f3f4f6;
+  white-space:nowrap;max-width:320px;overflow:hidden;text-overflow:ellipsis;
+  vertical-align:middle;color:#111827;font-size:11px;
 }
 tbody td:last-child{border-right:none}
-tbody td.archivo{
-  min-width:160px;
-  max-width:280px;
-  overflow:visible;
-  white-space:normal;
-}
+tbody td.archivo{min-width:160px;max-width:280px;overflow:visible;white-space:normal;}
 tbody td.archivo span[contenteditable]{
-  display:block;
-  outline:none;
-  white-space:pre-wrap;
-  word-break:break-word;
-  border-radius:2px;
-  padding:1px 2px;
-  cursor:text;
-  background:transparent;
+  display:block;outline:none;white-space:pre-wrap;word-break:break-word;
+  border-radius:2px;padding:1px 2px;cursor:text;background:transparent;
 }
 tbody td.archivo span[contenteditable]:hover{background:rgba(0,0,0,.04);}
 tbody td.archivo span[contenteditable]:focus{background:#fefce8;box-shadow:0 0 0 2px #ca8a04;}
+
+/* botón ocultar fila */
+td.col-hide{text-align:center;padding:4px 6px;}
+.hide-btn{
+  width:16px;height:16px;border-radius:50%;border:1.5px solid #d1d5db;
+  background:#fff;cursor:pointer;display:inline-flex;align-items:center;
+  justify-content:center;font-size:9px;color:#9ca3af;transition:all .12s;
+  line-height:1;padding:0;
+}
+.hide-btn:hover{border-color:#a78bfa;background:#ede9fe;color:#7c3aed;}
+tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
 </style>
 </head>
 <body>
@@ -139,20 +128,20 @@ tbody td.archivo span[contenteditable]:focus{background:#fefce8;box-shadow:0 0 0
 
 <div id="main-section" style="display:none">
   <div class="controls">
-    <!-- Mes -->
+    <!-- Mes: selección múltiple -->
     <span class="lbl">Mes</span>
     <div class="months" id="months"></div>
 
     <div class="sep"></div>
 
     <!-- Tipo -->
-<span class="lbl">Tipo</span>
-<div class="tipo-wrap" id="tipo-wrap">
-  <span class="mbtn on" data-tipo="ALL">Todos</span>
-  <span class="mbtn" data-tipo="TIENDA">Tienda</span>
-  <span class="mbtn" data-tipo="COLMENA">Colmena</span>
-  <span class="mbtn" data-tipo="PANAL">Panal</span>
-</div>
+    <span class="lbl">Tipo</span>
+    <div class="tipo-wrap" id="tipo-wrap">
+      <span class="mbtn on" data-tipo="ALL">Todos</span>
+      <span class="mbtn" data-tipo="TIENDA">Tienda</span>
+      <span class="mbtn" data-tipo="COLMENA">Colmena</span>
+      <span class="mbtn" data-tipo="PANAL">Panal</span>
+    </div>
 
     <div class="sep"></div>
 
@@ -164,15 +153,23 @@ tbody td.archivo span[contenteditable]:focus{background:#fefce8;box-shadow:0 0 0
 
     <div class="sep"></div>
 
+    <!-- Zona -->
+    <span class="lbl">Zona</span>
+    <select id="f-zona" class="txt-filter" style="cursor:pointer">
+      <option value="">Todas</option>
+    </select>
+
+    <div class="sep"></div>
+
     <!-- Filtro Centro -->
     <span class="lbl">Centro</span>
     <input type="text" id="f-centro" class="txt-filter" placeholder="Código…" style="width:80px" title="Filtra por código de centro (contiene)">
 
     <div class="sep"></div>
 
-    <!-- Filtro Descripción Movimiento -->
+    <!-- Filtro Descripción -->
     <span class="lbl">Descripción</span>
-    <input type="text" id="f-desc" class="txt-filter" placeholder="Buscar texto…" style="width:130px" title="Busca por texto en la descripción del movimiento (p.ej. código postal)">
+    <input type="text" id="f-desc" class="txt-filter" placeholder="Buscar texto…" style="width:130px" title="Busca por texto en la descripción del movimiento">
 
     <div class="sep"></div>
 
@@ -185,6 +182,7 @@ tbody td.archivo span[contenteditable]:focus{background:#fefce8;box-shadow:0 0 0
 
     <!-- Acciones -->
     <div class="actions">
+      <button class="btn show-hidden" id="btn-show-hidden" style="display:none" title="Mostrar/ocultar filas marcadas">👁 Filas ocultas (<span id="hidden-count">0</span>)</button>
       <button class="btn clear-filters" id="btn-clear" title="Limpiar todos los filtros activos">✕ Limpiar filtros</button>
       <button class="btn ghost" id="btn-update" style="display:none" title="Sustituir por un CSV nuevo manteniendo la sesión">↺ Actualizar CSV</button>
       <a class="btn meta" href="https://metabase.prod.monline/question/32892-control-de-cambios" target="_blank" title="Abrir consulta en Metabase">
@@ -203,7 +201,7 @@ tbody td.archivo span[contenteditable]:focus{background:#fefce8;box-shadow:0 0 0
 <script>
 var COLS = [
   {label:'MES',          src:'mes'},
-  {label:'CENTRO',       src:'mercadona_code'},
+  {label:'CENTRO',       src:'mercadona_code', special:'centro'},
   {label:'DENOMINACIÓN', src:'denominacion'},
   {label:'POBLACIÓN',    src:'poblacion'},
   {label:'PROVINCIA',    src:'provincia'},
@@ -217,11 +215,17 @@ var COLS = [
 var MONTH_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
   'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
-var allRows=[], activeMonth='ALL', activeTipo='ALL', activeMovimiento='',
-    filterCentro='', filterDesc='',
-    excludedCentros=[], sortColIdx=null, sortDir=1;
+var allRows=[], activeMonths=[], activeTipo='ALL', activeMovimiento='',
+    activeZona='', filterCentro='', filterDesc='',
+    excludedCentros=[], sortColIdx=null, sortDir=1,
+    hiddenRowIds=new Set(), showHidden=true;
 
-// ── Parser CSV ─────────────────────────────────────────────────────────────
+// ID único por fila para poder ocultarlas individualmente
+function assignRowIds(rows){
+  rows.forEach(function(r,i){ if(!r.__id) r.__id=i; });
+}
+
+// ── Parser CSV ──────────────────────────────────────────────────────────────
 function parseCSV(text){
   var rows=[],row=[],field='',inQ=false;
   for(var i=0;i<text.length;i++){
@@ -257,16 +261,29 @@ function csvToObjects(text){
   return result;
 }
 
-function getVal(row,col){return row[col.src]||'';}
+// CAMBIO 1: para PANAL mostrar campo 'code', para el resto 'mercadona_code'
+function getCentroVal(row){
+  if((row['tipo_centro']||'').toUpperCase()==='PANAL'){
+    return row['code']||row['mercadona_code']||'';
+  }
+  return row['mercadona_code']||'';
+}
+
+function getVal(row,col){
+  if(col.special==='centro') return getCentroVal(row);
+  return row[col.src]||'';
+}
 
 function filtered(){
-  var descLower = filterDesc.trim().toLowerCase();
-  var centroLower = filterCentro.trim().toLowerCase();
+  var descLower=filterDesc.trim().toLowerCase();
+  var centroLower=filterCentro.trim().toLowerCase();
   var d=allRows.filter(function(r){
-    if(activeMonth!=='ALL' && r['mes']!==activeMonth) return false;
+    // CAMBIO 4: filtro multi-mes
+    if(activeMonths.length>0 && activeMonths.indexOf(r['mes'])===-1) return false;
     if(activeTipo!=='ALL' && (r['tipo_centro']||'').toUpperCase()!==activeTipo) return false;
     if(activeMovimiento && r['movimiento']!==activeMovimiento) return false;
-    if(centroLower && (r['mercadona_code']||'').toLowerCase().indexOf(centroLower)===-1) return false;
+    if(activeZona && r['zona']!==activeZona) return false;
+    if(centroLower && getCentroVal(r).toLowerCase().indexOf(centroLower)===-1) return false;
     if(descLower && (r['descripcion_movimiento']||'').toLowerCase().indexOf(descLower)===-1) return false;
     if(excludedCentros.length && excludedCentros.indexOf((r['mercadona_code']||'').trim())!==-1) return false;
     return true;
@@ -281,10 +298,11 @@ function filtered(){
 }
 
 function hasActiveFilters(){
-  return activeMonth!=='ALL' || activeTipo!=='ALL' || activeMovimiento ||
-         filterCentro.trim() || filterDesc.trim() || excludedCentros.length;
+  return activeMonths.length>0 || activeTipo!=='ALL' || activeMovimiento ||
+         activeZona || filterCentro.trim() || filterDesc.trim() || excludedCentros.length;
 }
 
+// CAMBIO 4: meses múltiples — clic alterna selección individual
 function buildMonths(){
   var el=document.getElementById('months');
   var seen={},months=[];
@@ -293,28 +311,60 @@ function buildMonths(){
   el.innerHTML='';
   function mk(lbl,val){
     var b=document.createElement('span');
-    b.className='mbtn'+(val===activeMonth?' on':'');
-    b.textContent=lbl;b.dataset.m=val;
-    b.onclick=function(){activeMonth=val;document.querySelectorAll('#months .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.m===val);});render();};
+    var isAll=(val==='__ALL__');
+    var on=isAll?(activeMonths.length===0):(activeMonths.indexOf(val)!==-1);
+    b.className='mbtn'+(on?' on':'');
+    b.textContent=lbl; b.dataset.m=val;
+    b.onclick=function(){
+      if(isAll){
+        activeMonths=[];
+      } else {
+        var idx=activeMonths.indexOf(val);
+        if(idx===-1) activeMonths.push(val);
+        else activeMonths.splice(idx,1);
+      }
+      // actualizar clases
+      el.querySelectorAll('.mbtn').forEach(function(x){
+        if(x.dataset.m==='__ALL__') x.classList.toggle('on', activeMonths.length===0);
+        else x.classList.toggle('on', activeMonths.indexOf(x.dataset.m)!==-1);
+      });
+      render();
+    };
     el.appendChild(b);
   }
-  mk('Todos','ALL');
+  mk('Todos','__ALL__');
   months.forEach(function(m){mk(m[0]+m.slice(1).toLowerCase(),m);});
 }
 
 function buildMovimientos(){
   var sel=document.getElementById('f-mov');
-  var seen={}, movs=[];
+  var seen={},movs=[];
   allRows.forEach(function(r){var m=r['movimiento'];if(m&&!seen[m]){seen[m]=1;movs.push(m);}});
   movs.sort(function(a,b){return a.localeCompare(b,'es');});
   sel.innerHTML='<option value="">Todos</option>';
   movs.forEach(function(m){
     var o=document.createElement('option');
-    o.value=m;o.textContent=m[0]+m.slice(1).toLowerCase();
+    o.value=m; o.textContent=m[0]+m.slice(1).toLowerCase();
     sel.appendChild(o);
   });
   sel.value=activeMovimiento;
   sel.onchange=function(){activeMovimiento=sel.value;render();};
+}
+
+// CAMBIO 3: filtro Zona
+function buildZonas(){
+  var sel=document.getElementById('f-zona');
+  var seen={},zonas=[];
+  allRows.forEach(function(r){var z=r['zona'];if(z&&!seen[z]){seen[z]=1;zonas.push(z);}});
+  zonas.sort(function(a,b){return a.localeCompare(b,'es',{numeric:true});});
+  sel.innerHTML='<option value="">Todas</option>';
+  zonas.forEach(function(z){
+    var o=document.createElement('option');
+    o.value=z; o.textContent=z;
+    sel.appendChild(o);
+  });
+  sel.value=activeZona;
+  sel.onchange=function(){activeZona=sel.value;render();};
 }
 
 function buildTipo(){
@@ -327,7 +377,7 @@ function buildTipo(){
   });
 }
 
-// ── Exclusión de centros ───────────────────────────────────────────────────
+// Exclusión centros
 function renderExclTags(){
   var c=document.getElementById('excl-tags');
   c.innerHTML='';
@@ -355,71 +405,88 @@ document.getElementById('excl-input').addEventListener('keydown',function(e){
   }
 });
 
-// Filtros de texto: centro y descripción
-document.getElementById('f-centro').addEventListener('input', function(){
-  filterCentro = this.value;
-  render();
-});
-document.getElementById('f-desc').addEventListener('input', function(){
-  filterDesc = this.value;
-  render();
-});
+document.getElementById('f-centro').addEventListener('input',function(){filterCentro=this.value;render();});
+document.getElementById('f-desc').addEventListener('input',function(){filterDesc=this.value;render();});
 
-// ── Highlight helper ──────────────────────────────────────────────────────
-function highlight(text, term){
+function highlight(text,term){
   if(!term) return text.replace(/&/g,'&amp;').replace(/</g,'&lt;');
   var esc=text.replace(/&/g,'&amp;').replace(/</g,'&lt;');
   var termEsc=term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-  return esc.replace(new RegExp('('+termEsc+')', 'gi'),'<mark>$1</mark>');
+  return esc.replace(new RegExp('('+termEsc+')','gi'),'<mark>$1</mark>');
 }
 
-// ── Render tabla ──────────────────────────────────────────────────────────
+function updateHiddenBtn(){
+  var btn=document.getElementById('btn-show-hidden');
+  var n=hiddenRowIds.size;
+  document.getElementById('hidden-count').textContent=n;
+  btn.style.display=n>0?'inline-flex':'none';
+  btn.title=showHidden?'Ocultar filas marcadas':'Mostrar filas marcadas';
+}
+
+// CAMBIO 2: botón circulo para ocultar fila individual
 function render(){
   var rows=filtered();
   var total=allRows.length;
   var parts=[];
-  if(activeMonth!=='ALL') parts.push(activeMonth[0]+activeMonth.slice(1).toLowerCase());
+  if(activeMonths.length>0) parts.push(activeMonths.map(function(m){return m[0]+m.slice(1).toLowerCase();}).join('+'));
   if(activeTipo!=='ALL') parts.push(activeTipo);
   if(activeMovimiento) parts.push(activeMovimiento[0]+activeMovimiento.slice(1).toLowerCase());
+  if(activeZona) parts.push('Zona: '+activeZona);
   if(filterCentro.trim()) parts.push('Centro: "'+filterCentro.trim()+'"');
   if(filterDesc.trim()) parts.push('Desc: "'+filterDesc.trim()+'"');
   if(excludedCentros.length) parts.push('Excluidos: '+excludedCentros.join(', '));
 
+  var visibleRows=rows.filter(function(r){return showHidden||!hiddenRowIds.has(r.__id);});
   var statsEl=document.getElementById('stats');
-  statsEl.innerHTML='<span class="stats-count">'+rows.length+'</span>&nbsp;de '+total+' filas'+(parts.length?' &nbsp;·&nbsp; '+parts.join(' · '):'');
+  statsEl.innerHTML='<span class="stats-count">'+visibleRows.length+'</span>&nbsp;de '+total+' filas'+(parts.length?' &nbsp;·&nbsp; '+parts.join(' · '):'')+(hiddenRowIds.size>0?' &nbsp;·&nbsp; <span style="color:#7c3aed;font-weight:600">'+hiddenRowIds.size+' marcadas</span>':'');
 
-  // Botón limpiar: visible sólo si hay filtros activos
-  document.getElementById('btn-clear').style.display = hasActiveFilters() ? 'inline-block' : 'none';
+  document.getElementById('btn-clear').style.display=hasActiveFilters()?'inline-block':'none';
+  updateHiddenBtn();
 
-  var descTerm = filterDesc.trim();
+  var descTerm=filterDesc.trim();
 
   var thead=document.getElementById('thead');
-  thead.innerHTML='<tr>'+COLS.map(function(col,i){
+  thead.innerHTML='<tr><th class="col-hide" title="Marcar/desmarcar filas"></th>'+COLS.map(function(col,i){
     var sc=sortColIdx===i;
     return '<th class="'+(col.calc?'calc':'')+' '+(sc?(sortDir>0?'asc':'desc'):'')+'" data-i="'+i+'">'+col.label+'<span class="s"></span></th>';
   }).join('')+'</tr>';
-  thead.querySelectorAll('th').forEach(function(th){
+  thead.querySelectorAll('th[data-i]').forEach(function(th){
     th.onclick=function(){var i=+th.dataset.i;if(sortColIdx===i)sortDir*=-1;else{sortColIdx=i;sortDir=1;}render();};
   });
 
   var tbody=document.getElementById('tbody');
-  tbody.innerHTML=rows.slice(0,5000).map(function(row){
-    return '<tr>'+COLS.map(function(col){
+  tbody.innerHTML=rows.map(function(row){
+    var isHidden=hiddenRowIds.has(row.__id);
+    if(!showHidden && isHidden) return '';
+    var trClass=isHidden?'row-hidden':'';
+    var cells='<td class="col-hide"><button class="hide-btn" data-rid="'+row.__id+'" title="'+(isHidden?'Quitar marca':'Marcar para ocultar')+'">'+(isHidden?'●':'○')+'</button></td>';
+    cells+=COLS.map(function(col){
       var v=getVal(row,col);
       if(col.calc){
         var esc=v.replace(/&/g,'&amp;').replace(/</g,'&lt;');
         return '<td class="archivo"><span contenteditable="true" data-src="'+col.src+'" data-code="'+(row['mercadona_code']||'')+'">'+esc+'</span></td>';
       }
-      // Highlight en columna descripción
       var cellHtml;
       if(col.src==='descripcion_movimiento' && descTerm){
-        cellHtml=highlight(v, descTerm);
+        cellHtml=highlight(v,descTerm);
       } else {
         cellHtml=v.replace(/&/g,'&amp;').replace(/</g,'&lt;');
       }
       return '<td title="'+v.replace(/\n/g,' | ').replace(/"/g,'&quot;')+'">'+cellHtml+'</td>';
-    }).join('')+'</tr>';
+    }).join('');
+    return '<tr class="'+trClass+'" data-rid="'+row.__id+'">'+cells+'</tr>';
   }).join('');
+
+  // Eventos botones ocultar fila
+  tbody.querySelectorAll('.hide-btn').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var rid=+btn.dataset.rid;
+      if(hiddenRowIds.has(rid)) hiddenRowIds.delete(rid);
+      else hiddenRowIds.add(rid);
+      render();
+    });
+  });
 
   // Persistir ediciones en allRows
   tbody.querySelectorAll('span[contenteditable]').forEach(function(span){
@@ -427,28 +494,32 @@ function render(){
       var code=span.dataset.code;
       var src=span.dataset.src;
       var newVal=span.innerText;
-      allRows.forEach(function(r){
-        if((r['mercadona_code']||'')===code) r[src]=newVal;
-      });
+      allRows.forEach(function(r){if((r['mercadona_code']||'')===code) r[src]=newVal;});
     });
-    span.addEventListener('keydown',function(e){
-      if(e.key==='Escape') span.blur();
-    });
+    span.addEventListener('keydown',function(e){if(e.key==='Escape') span.blur();});
   });
 }
 
-// ── Limpiar todos los filtros ─────────────────────────────────────────────
+// Botón mostrar/ocultar filas marcadas
+document.getElementById('btn-show-hidden').onclick=function(){
+  showHidden=!showHidden;
+  render();
+};
+
+// Limpiar filtros
 document.getElementById('btn-clear').onclick=function(){
-  activeMonth='ALL';
+  activeMonths=[];
   activeTipo='ALL';
   activeMovimiento='';
+  activeZona='';
   filterCentro='';
   filterDesc='';
   excludedCentros=[];
   document.getElementById('f-centro').value='';
   document.getElementById('f-desc').value='';
   document.getElementById('f-mov').value='';
-  document.querySelectorAll('#months .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.m==='ALL');});
+  document.getElementById('f-zona').value='';
+  document.querySelectorAll('#months .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.m==='__ALL__');});
   document.querySelectorAll('#tipo-wrap .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.tipo==='ALL');});
   renderExclTags();
   render();
@@ -457,30 +528,28 @@ document.getElementById('btn-clear').onclick=function(){
 var STORAGE_KEY='cambios2026_csv';
 var STORAGE_NAME='cambios2026_name';
 
-function showSaved(name){
+function showSaved(){
   document.getElementById('hdr-saved').style.display='inline';
   document.getElementById('btn-update').style.display='inline-block';
 }
-function hideSaved(){
-  document.getElementById('hdr-saved').style.display='none';
-  document.getElementById('btn-update').style.display='none';
-}
 
-// ── Carga fichero ─────────────────────────────────────────────────────────
-function initFromText(text, name){
+function initFromText(text,name){
   allRows=csvToObjects(text);
+  assignRowIds(allRows);
+  hiddenRowIds=new Set();
   document.getElementById('hdr-sub').textContent=allRows.length+' filas · '+name;
   document.getElementById('upload-section').style.display='none';
   document.getElementById('main-section').style.display='block';
-  activeMonth='ALL';activeTipo='ALL';activeMovimiento='';
+  activeMonths=[];activeTipo='ALL';activeMovimiento='';activeZona='';
   filterCentro='';filterDesc='';
-  excludedCentros=[];sortColIdx=null;sortDir=1;
+  excludedCentros=[];sortColIdx=null;sortDir=1;showHidden=true;
   buildMonths();
   buildTipo();
   buildMovimientos();
+  buildZonas();
   renderExclTags();
   render();
-  showSaved(name);
+  showSaved();
 }
 
 function loadFile(file){
@@ -489,17 +558,16 @@ function loadFile(file){
   reader.onload=function(e){
     var text=e.target.result;
     try{localStorage.setItem(STORAGE_KEY,text);localStorage.setItem(STORAGE_NAME,file.name);}catch(ex){}
-    initFromText(text, file.name);
+    initFromText(text,file.name);
   };
   reader.readAsText(file,'UTF-8');
 }
 
-// Recuperar CSV guardado al abrir la página
 (function(){
   try{
     var saved=localStorage.getItem(STORAGE_KEY);
     var savedName=localStorage.getItem(STORAGE_NAME)||'CSV guardado';
-    if(saved) initFromText(saved, savedName);
+    if(saved) initFromText(saved,savedName);
   }catch(ex){}
 })();
 
@@ -511,41 +579,23 @@ dz.ondragover=function(e){e.preventDefault();dz.classList.add('drag');};
 dz.ondragleave=function(){dz.classList.remove('drag');};
 dz.ondrop=function(e){e.preventDefault();dz.classList.remove('drag');loadFile(e.dataTransfer.files[0]);};
 
-// Actualizar CSV: abre el selector sin salir de la vista
 var fiUpdate=document.createElement('input');
 fiUpdate.type='file';fiUpdate.accept='.csv';
 fiUpdate.onchange=function(e){loadFile(e.target.files[0]);fiUpdate.value='';};
 document.getElementById('btn-update').onclick=function(){fiUpdate.click();};
 
-// ── Exportar Excel con formato ────────────────────────────────────────────
+// Exportar Excel
 document.getElementById('btn-export').onclick=function(){
-  var rows=filtered();
-
+  var rows=filtered().filter(function(r){return !hiddenRowIds.has(r.__id);});
   var headers=COLS.map(function(c){return c.label;});
   var data=[headers].concat(rows.map(function(row){
-    return COLS.map(function(col){
-      return getVal(row,col).replace(/\n/g,' | ');
-    });
+    return COLS.map(function(col){return getVal(row,col).replace(/\n/g,' | ');});
   }));
 
   var ws=XLSX.utils.aoa_to_sheet(data);
-
-  var hdrStyle={
-    font:{bold:true,color:{rgb:'FFFFFF'},sz:10},
-    fill:{fgColor:{rgb:'14532D'}},
-    alignment:{horizontal:'center',vertical:'center',wrapText:false},
-    border:{bottom:{style:'medium',color:{rgb:'166534'}},right:{style:'thin',color:{rgb:'166534'}}}
-  };
-  var evenStyle={
-    fill:{fgColor:{rgb:'F9FAFB'}},font:{sz:10},
-    alignment:{vertical:'center',wrapText:true},
-    border:{bottom:{style:'thin',color:{rgb:'E5E7EB'}},right:{style:'thin',color:{rgb:'F3F4F6'}}}
-  };
-  var oddStyle={
-    fill:{fgColor:{rgb:'FFFFFF'}},font:{sz:10},
-    alignment:{vertical:'center',wrapText:true},
-    border:{bottom:{style:'thin',color:{rgb:'E5E7EB'}},right:{style:'thin',color:{rgb:'F3F4F6'}}}
-  };
+  var hdrStyle={font:{bold:true,color:{rgb:'FFFFFF'},sz:10},fill:{fgColor:{rgb:'14532D'}},alignment:{horizontal:'center',vertical:'center',wrapText:false},border:{bottom:{style:'medium',color:{rgb:'166534'}},right:{style:'thin',color:{rgb:'166534'}}}};
+  var evenStyle={fill:{fgColor:{rgb:'F9FAFB'}},font:{sz:10},alignment:{vertical:'center',wrapText:true},border:{bottom:{style:'thin',color:{rgb:'E5E7EB'}},right:{style:'thin',color:{rgb:'F3F4F6'}}}};
+  var oddStyle={fill:{fgColor:{rgb:'FFFFFF'}},font:{sz:10},alignment:{vertical:'center',wrapText:true},border:{bottom:{style:'thin',color:{rgb:'E5E7EB'}},right:{style:'thin',color:{rgb:'F3F4F6'}}}};
 
   var range=XLSX.utils.decode_range(ws['!ref']);
   for(var R=range.s.r;R<=range.e.r;R++){
@@ -555,22 +605,17 @@ document.getElementById('btn-export').onclick=function(){
       ws[addr].s=(R===0)?hdrStyle:(R%2===0)?evenStyle:oddStyle;
     }
   }
-
   ws['!rows']=[{hpt:18}];
   ws['!cols']=COLS.map(function(col){
     var max=col.label.length;
-    rows.slice(0,300).forEach(function(r){
-      var v=getVal(r,col).replace(/\n/g,' | ');
-      if(v.length>max) max=v.length;
-    });
+    rows.slice(0,300).forEach(function(r){var v=getVal(r,col).replace(/\n/g,' | ');if(v.length>max) max=v.length;});
     return {wch:Math.min(max+2,60)};
   });
 
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Cambios Servicio Online');
-
   var suffix='';
-  if(activeMonth!=='ALL') suffix+='_'+activeMonth;
+  if(activeMonths.length>0) suffix+='_'+activeMonths.join('-');
   if(activeTipo!=='ALL') suffix+='_'+activeTipo;
   XLSX.writeFile(wb,'cambios_servicio_online'+suffix+'.xlsx');
 };
