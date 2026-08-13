@@ -153,6 +153,14 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
 
     <div class="sep"></div>
 
+    <!-- Región -->
+    <span class="lbl">Región</span>
+    <select id="f-region" class="txt-filter" style="cursor:pointer">
+      <option value="">Todas</option>
+    </select>
+
+    <div class="sep"></div>
+
     <!-- Zona -->
     <span class="lbl">Zona</span>
     <select id="f-zona" class="txt-filter" style="cursor:pointer">
@@ -216,7 +224,7 @@ var MONTH_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
   'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
 var allRows=[], activeMonths=[], activeTipo='ALL', activeMovimiento='',
-    activeZona='', filterCentro='', filterDesc='',
+    activeZona='', activeRegion='', filterCentro='', filterDesc='',
     excludedCentros=[], sortColIdx=null, sortDir=1,
     hiddenRowIds=new Set(), showHidden=true;
 
@@ -282,6 +290,7 @@ function filtered(){
     if(activeMonths.length>0 && activeMonths.indexOf(r['mes'])===-1) return false;
     if(activeTipo!=='ALL' && (r['tipo_centro']||'').toUpperCase()!==activeTipo) return false;
     if(activeMovimiento && r['movimiento']!==activeMovimiento) return false;
+    if(activeRegion && r['region']!==activeRegion) return false;
     if(activeZona && r['zona']!==activeZona) return false;
     if(centroLower && getCentroVal(r).toLowerCase().indexOf(centroLower)===-1) return false;
     if(descLower && (r['descripcion_movimiento']||'').toLowerCase().indexOf(descLower)===-1) return false;
@@ -299,7 +308,7 @@ function filtered(){
 
 function hasActiveFilters(){
   return activeMonths.length>0 || activeTipo!=='ALL' || activeMovimiento ||
-         activeZona || filterCentro.trim() || filterDesc.trim() || excludedCentros.length;
+         activeRegion || activeZona || filterCentro.trim() || filterDesc.trim() || excludedCentros.length;
 }
 
 // CAMBIO 4: meses múltiples — clic alterna selección individual
@@ -349,6 +358,22 @@ function buildMovimientos(){
   });
   sel.value=activeMovimiento;
   sel.onchange=function(){activeMovimiento=sel.value;render();};
+}
+
+// Filtro Región (solo filtro, no columna en la tabla)
+function buildRegiones(){
+  var sel=document.getElementById('f-region');
+  var seen={},regiones=[];
+  allRows.forEach(function(r){var g=r['region'];if(g&&!seen[g]){seen[g]=1;regiones.push(g);}});
+  regiones.sort(function(a,b){return a.localeCompare(b,'es',{numeric:true});});
+  sel.innerHTML='<option value="">Todas</option>';
+  regiones.forEach(function(g){
+    var o=document.createElement('option');
+    o.value=g; o.textContent=g;
+    sel.appendChild(o);
+  });
+  sel.value=activeRegion;
+  sel.onchange=function(){activeRegion=sel.value;render();};
 }
 
 // CAMBIO 3: filtro Zona
@@ -431,6 +456,7 @@ function render(){
   if(activeMonths.length>0) parts.push(activeMonths.map(function(m){return m[0]+m.slice(1).toLowerCase();}).join('+'));
   if(activeTipo!=='ALL') parts.push(activeTipo);
   if(activeMovimiento) parts.push(activeMovimiento[0]+activeMovimiento.slice(1).toLowerCase());
+  if(activeRegion) parts.push('Región: '+activeRegion);
   if(activeZona) parts.push('Zona: '+activeZona);
   if(filterCentro.trim()) parts.push('Centro: "'+filterCentro.trim()+'"');
   if(filterDesc.trim()) parts.push('Desc: "'+filterDesc.trim()+'"');
@@ -511,6 +537,7 @@ document.getElementById('btn-clear').onclick=function(){
   activeMonths=[];
   activeTipo='ALL';
   activeMovimiento='';
+  activeRegion='';
   activeZona='';
   filterCentro='';
   filterDesc='';
@@ -518,6 +545,7 @@ document.getElementById('btn-clear').onclick=function(){
   document.getElementById('f-centro').value='';
   document.getElementById('f-desc').value='';
   document.getElementById('f-mov').value='';
+  document.getElementById('f-region').value='';
   document.getElementById('f-zona').value='';
   document.querySelectorAll('#months .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.m==='__ALL__');});
   document.querySelectorAll('#tipo-wrap .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.tipo==='ALL');});
@@ -540,12 +568,13 @@ function initFromText(text,name){
   document.getElementById('hdr-sub').textContent=allRows.length+' filas · '+name;
   document.getElementById('upload-section').style.display='none';
   document.getElementById('main-section').style.display='block';
-  activeMonths=[];activeTipo='ALL';activeMovimiento='';activeZona='';
+  activeMonths=[];activeTipo='ALL';activeMovimiento='';activeRegion='';activeZona='';
   filterCentro='';filterDesc='';
   excludedCentros=[];sortColIdx=null;sortDir=1;showHidden=true;
   buildMonths();
   buildTipo();
   buildMovimientos();
+  buildRegiones();
   buildZonas();
   renderExclTags();
   render();
@@ -617,6 +646,7 @@ document.getElementById('btn-export').onclick=function(){
   var suffix='';
   if(activeMonths.length>0) suffix+='_'+activeMonths.join('-');
   if(activeTipo!=='ALL') suffix+='_'+activeTipo;
+  if(activeRegion) suffix+='_'+activeRegion;
   XLSX.writeFile(wb,'cambios_servicio_online'+suffix+'.xlsx');
 };
 </script>
