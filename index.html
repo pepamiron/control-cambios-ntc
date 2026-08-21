@@ -11,13 +11,15 @@ header{background:#14532d;padding:10px 16px;display:flex;align-items:center;gap:
 header h1{font-size:14px;font-weight:600;color:#fff}
 header span{font-size:11px;color:#9ca3af;margin-left:auto}
 #upload-section{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 45px)}
-.drop{border:2px dashed #c4c9d8;border-radius:14px;padding:48px 40px;text-align:center;background:#fff;cursor:pointer;transition:all .15s;max-width:440px;width:100%}
+.upload-box{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:440px;width:100%}
+.drop{border:2px dashed #c4c9d8;border-radius:14px;padding:48px 40px;text-align:center;background:#fff;cursor:pointer;transition:all .15s;width:100%}
 .drop:hover,.drop.drag{border-color:#2563eb;background:#eff4ff}
 .drop svg{opacity:.35;margin-bottom:14px}
 .drop p{color:#6b7280;font-size:13px;line-height:1.7}
 .drop strong{color:#2563eb}
 .drop small{color:#9ca3b0;font-size:11px;display:block;margin-top:8px}
 #file-input{display:none}
+.meta-hint{font-size:11px;color:#6b7280;text-align:center;line-height:1.6}
 
 /* toolbar */
 .controls{background:#fff;border-bottom:1px solid #d1d5db;padding:7px 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;position:sticky;top:0;z-index:20;box-shadow:0 1px 3px rgba(0,0,0,.08)}
@@ -36,6 +38,7 @@ header span{font-size:11px;color:#9ca3af;margin-left:auto}
 .btn.ghost{color:#9ca3b0;border-color:#e5e7eb}
 .btn.meta{background:#2563eb;color:#fff;border-color:#1d4ed8;text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:4px 10px}
 .btn.meta:hover{background:#1d4ed8}
+.btn.meta.big{padding:8px 18px;font-size:12px;border-radius:6px}
 .btn.clear-filters{background:#fef3c7;color:#92400e;border-color:#fcd34d;font-weight:600}
 .btn.clear-filters:hover{background:#fde68a}
 .btn.show-hidden{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;font-weight:600}
@@ -118,10 +121,17 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
 </header>
 
 <div id="upload-section">
-  <div class="drop" id="drop-zone">
-    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-    <p>Arrastra el CSV aquí o<br><strong>haz clic para seleccionarlo</strong></p>
-    <small>CSV exportado desde Metabase</small>
+  <div class="upload-box">
+    <div class="drop" id="drop-zone">
+      <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <p>Arrastra el CSV aquí o<br><strong>haz clic para seleccionarlo</strong></p>
+      <small>CSV exportado desde Metabase</small>
+    </div>
+    <a class="btn meta big" href="https://metabase.prod.monline/question/32892-control-de-cambios" target="_blank" title="Abrir consulta en Metabase para descargar el CSV">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Abrir consulta en Metabase
+    </a>
+    <p class="meta-hint">¿No tienes el CSV todavía? Ábrelo en Metabase y descárgalo desde allí.</p>
   </div>
   <input type="file" id="file-input" accept=".csv">
 </div>
