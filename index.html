@@ -106,6 +106,7 @@ tbody td{
 }
 tbody td:last-child{border-right:none}
 tbody td.editable{min-width:160px;max-width:300px;overflow:visible;white-space:normal;}
+tbody td.mov-cell{min-width:170px;max-width:340px;overflow:visible;white-space:nowrap;}
 tbody td.editable span.edit-text{
   display:block;outline:none;white-space:pre-wrap;word-break:break-word;
   border-radius:2px;padding:1px 2px;cursor:text;background:transparent;
@@ -872,8 +873,7 @@ document.getElementById('btn-restore-backup').onclick=function(){
 document.getElementById('btn-clear-overrides').onclick=function(){
   var n=Object.keys(overrides).length;
   if(n===0){ alert('No hay correcciones manuales guardadas todavía.'); return; }
-  var texto=prompt('Vas a borrar '+n+' fila(s) con correcciones manuales de Movimiento/Descripción/Archivos.\nSe guarda una copia de seguridad por si te equivocas (botón "Restaurar copia").\n\nEscribe BORRAR (en mayúsculas) para confirmar:');
-  if(texto!=='BORRAR') return;
+  if(!confirm('¿Estás seguro de que quieres borrar las '+n+' fila(s) con correcciones? Se guarda una copia por si te equivocas (botón "Restaurar copia").')) return;
   try{
     localStorage.setItem(OVERRIDES_BACKUP_KEY, JSON.stringify({data:overrides, ts:new Date().toISOString()}));
   }catch(ex){}
