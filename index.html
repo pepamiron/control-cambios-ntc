@@ -43,6 +43,8 @@ header span{font-size:11px;color:#9ca3af;margin-left:auto}
 .btn.clear-filters:hover{background:#fde68a}
 .btn.show-hidden{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;font-weight:600}
 .btn.show-hidden:hover{background:#ddd6fe}
+.btn.publish{background:#0e7490;color:#fff;border-color:#155e75;font-weight:600}
+.btn.publish:hover{background:#155e75}
 .btn.clear-overrides{background:#fee2e2;color:#991b1b;border-color:#fca5a5;font-weight:600}
 .btn.clear-overrides:hover{background:#fecaca}
 
@@ -145,6 +147,7 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
   <span id="hdr-sub">Sube el CSV para comenzar</span>
   <span id="hdr-saved" style="display:none;font-size:10px;color:#86efac;margin-left:8px">● CSV guardado localmente</span>
   <span id="hdr-sync" style="font-size:10px;color:#d1d5db;margin-left:8px">☁ correcciones: sin configurar</span>
+  <span id="hdr-csv" style="font-size:10px;color:#d1d5db;margin-left:8px">☁ CSV: sin configurar</span>
 </header>
 
 <div id="upload-section">
@@ -239,6 +242,7 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
       <button class="btn clear-overrides" id="btn-clear-overrides" title="Borra todas las correcciones manuales de Movimiento/Descripción/Archivos">🗑 Borrar correcciones</button>
       <button class="btn clear-filters" id="btn-clear" title="Limpiar todos los filtros activos">✕ Limpiar filtros</button>
       <button class="btn ghost" id="btn-update" style="display:none" title="Sustituir por un CSV nuevo manteniendo la sesión">↺ Actualizar CSV</button>
+      <button class="btn publish" id="btn-publish-csv" style="display:none" title="Sube el CSV actual al bin compartido para que lo vea todo el que abra el enlace">☁ Publicar CSV</button>
       <a class="btn meta" href="https://metabase.prod.monline/question/32892-control-de-cambios" target="_blank" title="Abrir consulta en Metabase">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         Metabase
@@ -252,6 +256,7 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
 <script>
 // ══════════════════════════════════════════════════════════════════════════
 // CONFIGURACIÓN JSONBIN — rellena con tus datos (jsonbin.io → tu bin)
@@ -260,9 +265,14 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
 // clave de acceso restringida a este bin (Access Key), no tu Master Key
 // general de la cuenta, para limitar el daño si alguien la copia.
 // ══════════════════════════════════════════════════════════════════════════
-var JSONBIN_BIN_ID  = '6a9a7853f5f4af5e2968e78d';   // <-- pega aquí el ID de tu bin
-var JSONBIN_API_KEY = '';   // opcional — déjalo vacío si tu bin no la necesita
-var JSONBIN_URL = 'https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID;
+var JSONBIN_BIN_ID     = '6a9a7853f5f4af5e2968e78d';   // bin 1: correcciones manuales
+var JSONBIN_CSV_BIN_ID = '6a9a9df1f5f4af5e29697907';   // bin 2: el CSV compartido
+var JSONBIN_API_KEY    = '$2a$10$3qWeWD5IOFOldcuBbPNXZu2z0wst60K0GiyjQuiTGVHoOI9efQlW6';   // Master Key
+var JSONBIN_URL     = 'https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID;
+var JSONBIN_CSV_URL = 'https://api.jsonbin.io/v3/b/' + JSONBIN_CSV_BIN_ID;
+
+// Límite del plan gratuito de JSONBin: 100 KB por bin. Dejamos margen.
+var CSV_BIN_MAX_BYTES = 95000;
 
 function jsonbinConfigured(){ return !!JSONBIN_BIN_ID; }
 function jsonbinHeaders(extra){
@@ -314,6 +324,120 @@ async function saveOverridesNow(){
   }catch(e){
     console.error('JSONBin save error', e);
     setSyncStatus('error al guardar', '#fca5a5');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CSV COMPARTIDO — se guarda comprimido en un segundo bin de JSONBin, para
+// que cualquiera que abra el enlace vea los mismos datos sin subir nada.
+// ══════════════════════════════════════════════════════════════════════════
+function csvBinConfigured(){ return !!JSONBIN_CSV_BIN_ID; }
+function lzReady(){ return typeof pako !== 'undefined'; }
+
+// Comprime texto (UTF-8) a base64 con deflate. Necesario porque un bin del plan
+// gratuito de JSONBin no puede pasar de 100 KB y un CSV en crudo se pasa.
+function comprimirTexto(text){
+  var bytes = pako.deflate(text);            // pako codifica el string como UTF-8
+  var bin = '', CH = 8192;                    // por trozos: evita desbordar la pila
+  for(var i=0; i<bytes.length; i+=CH){
+    bin += String.fromCharCode.apply(null, bytes.subarray(i, i+CH));
+  }
+  return btoa(bin);
+}
+
+function descomprimirTexto(b64){
+  var bin = atob(b64);
+  var bytes = new Uint8Array(bin.length);
+  for(var i=0; i<bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return pako.inflate(bytes, { to:'string' });   // devuelve UTF-8, acentos incluidos
+}
+
+function setCsvStatus(text, color){
+  var el = document.getElementById('hdr-csv');
+  if(!el) return;
+  el.textContent = '☁ CSV: ' + text;
+  el.style.color = color || '#d1d5db';
+}
+
+// Descarga el CSV compartido. Devuelve {text, name, ts} o null.
+async function fetchSharedCsv(){
+  if(!csvBinConfigured()) return null;
+  setCsvStatus('cargando…', '#fde68a');
+  try{
+    var res = await fetch(JSONBIN_CSV_URL + '/latest', { headers: jsonbinHeaders() });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
+    var rec = data.record || {};
+    if(!rec.csv){ setCsvStatus('no hay CSV publicado', '#fde68a'); return null; }
+    var text;
+    if(rec.comprimido === false){
+      text = rec.csv;
+    }else{
+      if(!lzReady()) throw new Error('librería de compresión no disponible');
+      text = descomprimirTexto(rec.csv);
+    }
+    if(!text) throw new Error('CSV vacío o corrupto tras descomprimir');
+    var etiqueta = rec.actualizado
+      ? 'compartido (' + new Date(rec.actualizado).toLocaleString('es-ES') + ')'
+      : 'compartido';
+    setCsvStatus(etiqueta, '#86efac');
+    return { text: text, name: rec.nombre || 'CSV compartido', ts: rec.actualizado };
+  }catch(e){
+    console.error('JSONBin CSV load error', e);
+    setCsvStatus('error al cargar', '#fca5a5');
+    return null;
+  }
+}
+
+// Sube el CSV al bin compartido. Devuelve true si lo consigue.
+async function publishCsv(text, name){
+  if(!csvBinConfigured()){
+    alert('Falta configurar JSONBIN_CSV_BIN_ID en el código: sin eso el CSV solo se guarda en este navegador.');
+    return false;
+  }
+  if(!lzReady()){
+    alert('No se ha podido cargar la librería de compresión (pako). Revisa la conexión y recarga la página.');
+    return false;
+  }
+  setCsvStatus('publicando…', '#fde68a');
+  var comprimido = comprimirTexto(text);
+  var payload = {
+    csv: comprimido,
+    comprimido: true,
+    nombre: name || 'CSV',
+    filas: (text.match(/\n/g) || []).length,
+    actualizado: new Date().toISOString()
+  };
+  var body = JSON.stringify(payload);
+  var bytes = new Blob([body]).size;
+
+  if(bytes > CSV_BIN_MAX_BYTES){
+    var origKB = Math.round(new Blob([text]).size / 1024);
+    var compKB = Math.round(bytes / 1024);
+    setCsvStatus('demasiado grande', '#fca5a5');
+    alert('El CSV es demasiado grande para publicarlo.\n\n' +
+          'Original: ' + origKB + ' KB\n' +
+          'Comprimido: ' + compKB + ' KB\n' +
+          'Límite del plan gratuito de JSONBin: 100 KB\n\n' +
+          'El CSV sí se ha cargado en tu navegador (funciona igual para ti), pero no se ha compartido.\n\n' +
+          'Opciones: filtrar la consulta de Metabase a menos meses/columnas, o pasar a un plan Pro de JSONBin (bins XL hasta 10 MB).');
+    return false;
+  }
+
+  try{
+    var res = await fetch(JSONBIN_CSV_URL, {
+      method:'PUT',
+      headers: jsonbinHeaders({ 'Content-Type':'application/json' }),
+      body: body
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    setCsvStatus('publicado (' + Math.round(bytes/1024) + ' KB)', '#86efac');
+    return true;
+  }catch(e){
+    console.error('JSONBin CSV save error', e);
+    setCsvStatus('error al publicar', '#fca5a5');
+    alert('No se ha podido publicar el CSV: ' + e.message + '\n\nEl CSV está cargado en tu navegador, pero los demás no lo verán.');
+    return false;
   }
 }
 
@@ -911,6 +1035,7 @@ var STORAGE_NAME='cambios2026_name';
 function showSaved(){
   document.getElementById('hdr-saved').style.display='inline';
   document.getElementById('btn-update').style.display='inline-block';
+  if(csvBinConfigured()) document.getElementById('btn-publish-csv').style.display='inline-block';
 }
 
 function initFromText(text,name){
@@ -940,13 +1065,26 @@ function initFromText(text,name){
   updateRestoreBtn();
 }
 
+// Texto del CSV actualmente cargado, para poder republicarlo sin volver a subir fichero
+var currentCsvText='', currentCsvName='';
+
 function loadFile(file){
   if(!file) return;
   var reader=new FileReader();
-  reader.onload=function(e){
+  reader.onload=async function(e){
     var text=e.target.result;
+    currentCsvText=text; currentCsvName=file.name;
     try{localStorage.setItem(STORAGE_KEY,text);localStorage.setItem(STORAGE_NAME,file.name);}catch(ex){}
     initFromText(text,file.name);
+    // Publicar para que lo vean los demás: se pregunta, no se hace a la callada,
+    // porque sustituye el CSV que está viendo todo el equipo.
+    if(csvBinConfigured()){
+      if(confirm('CSV cargado ('+allRows.length+' filas).\n\n¿Publicarlo en el bin compartido para que lo vea todo el que abra el enlace?\n\nSustituirá el CSV compartido actual.')){
+        await publishCsv(text, file.name);
+      }else{
+        setCsvStatus('sin publicar (solo en este navegador)', '#fde68a');
+      }
+    }
   };
   reader.readAsText(file,'UTF-8');
 }
@@ -956,12 +1094,48 @@ document.getElementById('year-hint').textContent=YEAR_CURRENT+' y '+YEAR_NEXT;
 // Carga correcciones de JSONBin en paralelo (no depende de tener CSV ya cargado)
 loadOverrides();
 
+// Arranque: primero intenta el CSV compartido; si no hay, cae al de este navegador.
 (function(){
+  if(!csvBinConfigured()){
+    setCsvStatus('sin configurar');
+    try{
+      var saved=localStorage.getItem(STORAGE_KEY);
+      if(saved){
+        currentCsvText=saved;
+        currentCsvName=localStorage.getItem(STORAGE_NAME)||'CSV guardado';
+        initFromText(saved,currentCsvName);
+      }
+    }catch(ex){}
+    return;
+  }
+
+  // Pinta primero el CSV local (si hay) para no dejar la pantalla en blanco,
+  // y luego lo sustituye por el compartido cuando llegue.
+  var localText=null, localName='CSV guardado';
   try{
-    var saved=localStorage.getItem(STORAGE_KEY);
-    var savedName=localStorage.getItem(STORAGE_NAME)||'CSV guardado';
-    if(saved) initFromText(saved,savedName);
+    localText=localStorage.getItem(STORAGE_KEY);
+    localName=localStorage.getItem(STORAGE_NAME)||localName;
   }catch(ex){}
+  if(localText){
+    currentCsvText=localText; currentCsvName=localName;
+    initFromText(localText,localName);
+  }
+
+  fetchSharedCsv().then(function(shared){
+    if(!shared){
+      if(!localText) setCsvStatus('no hay CSV publicado — sube uno', '#fde68a');
+      return;
+    }
+    if(shared.text===localText) return;  // ya tenemos ese mismo CSV
+    currentCsvText=shared.text; currentCsvName=shared.name;
+    try{
+      localStorage.setItem(STORAGE_KEY,shared.text);
+      localStorage.setItem(STORAGE_NAME,shared.name);
+    }catch(ex){}
+    initFromText(shared.text,shared.name);
+    var etiqueta=shared.ts ? 'compartido ('+new Date(shared.ts).toLocaleString('es-ES')+')' : 'compartido';
+    setCsvStatus(etiqueta, '#86efac');
+  });
 })();
 
 var dz=document.getElementById('drop-zone');
@@ -976,6 +1150,13 @@ var fiUpdate=document.createElement('input');
 fiUpdate.type='file';fiUpdate.accept='.csv';
 fiUpdate.onchange=function(e){loadFile(e.target.files[0]);fiUpdate.value='';};
 document.getElementById('btn-update').onclick=function(){fiUpdate.click();};
+
+document.getElementById('btn-publish-csv').onclick=async function(){
+  if(!currentCsvText){ alert('No hay CSV cargado que publicar.'); return; }
+  if(!confirm('Se va a publicar el CSV actual ('+allRows.length+' filas) en el bin compartido.\n\nSustituirá el CSV que está viendo el resto del equipo. ¿Continuar?')) return;
+  var ok=await publishCsv(currentCsvText, currentCsvName||'CSV');
+  if(ok) alert('CSV publicado. Cualquiera que abra el enlace verá estos datos.');
+};
 
 document.getElementById('btn-export').onclick=function(){
   var rows=filtered().filter(function(r){return !hiddenRowIds.has(r.__id);});
