@@ -43,6 +43,8 @@ header span{font-size:11px;color:#9ca3af;margin-left:auto}
 .btn.clear-filters:hover{background:#fde68a}
 .btn.show-hidden{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;font-weight:600}
 .btn.show-hidden:hover{background:#ddd6fe}
+.btn.clear-overrides{background:#fee2e2;color:#991b1b;border-color:#fca5a5;font-weight:600}
+.btn.clear-overrides:hover{background:#fecaca}
 
 mark{background:#fef08a;color:#713f12;border-radius:2px;padding:0 1px}
 
@@ -54,6 +56,18 @@ mark{background:#fef08a;color:#713f12;border-radius:2px;padding:0 1px}
 #excl-input:focus{outline:none;border-color:#2563eb}
 .excl-tag{display:inline-flex;align-items:center;gap:2px;background:#fee2e2;color:#991b1b;border-radius:3px;padding:1px 6px;font-size:10px;font-weight:600}
 .excl-tag button{background:none;border:none;cursor:pointer;color:#991b1b;font-size:11px;padding:0;line-height:1;margin-left:1px}
+
+.ms-wrap{position:relative}
+.ms-btn{font-size:11px;padding:3px 10px;border:1px solid #d1d5db;border-radius:3px;background:#f9fafb;cursor:pointer;color:#374151;white-space:nowrap}
+.ms-btn:hover{background:#e5e7eb}
+.ms-panel{position:absolute;top:100%;left:0;margin-top:3px;background:#fff;border:1px solid #d1d5db;border-radius:4px;box-shadow:0 4px 14px rgba(0,0,0,.18);padding:6px;z-index:30;display:none;min-width:280px;max-height:280px;overflow:auto}
+.ms-panel.open{display:block}
+.ms-panel-actions{display:flex;gap:6px;padding:0 2px 6px;margin-bottom:4px;border-bottom:1px solid #e5e7eb}
+.ms-panel-actions button{font-size:10px;padding:2px 8px;border:1px solid #d1d5db;border-radius:3px;background:#f9fafb;cursor:pointer;color:#374151}
+.ms-panel-actions button:hover{background:#e5e7eb}
+.ms-item{display:flex;align-items:center;gap:6px;font-size:11px;padding:3px 5px;border-radius:3px;cursor:pointer;white-space:nowrap;color:#374151}
+.ms-item:hover{background:#f3f4f6}
+.ms-item input{cursor:pointer;margin:0}
 
 .stats{font-size:11px;color:#6b7280;padding:4px 12px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:8px}
 .stats-count{font-weight:700;color:#14532d}
@@ -76,7 +90,6 @@ thead th .s{margin-left:4px;opacity:.5;font-size:9px}
 thead th.asc .s::after{content:"▲"}
 thead th.desc .s::after{content:"▼"}
 thead th:not(.asc):not(.desc) .s::after{content:"▼";opacity:.25}
-/* columna ocultar: no sortable */
 thead th.col-hide{cursor:default;text-align:center;width:28px;padding:4px 6px}
 thead th.col-hide:hover{background:#14532d}
 
@@ -92,13 +105,25 @@ tbody td{
   vertical-align:middle;color:#111827;font-size:11px;
 }
 tbody td:last-child{border-right:none}
-tbody td.archivo{min-width:160px;max-width:280px;overflow:visible;white-space:normal;}
-tbody td.archivo span[contenteditable]{
+tbody td.editable{min-width:160px;max-width:300px;overflow:visible;white-space:normal;}
+tbody td.editable span.edit-text{
   display:block;outline:none;white-space:pre-wrap;word-break:break-word;
   border-radius:2px;padding:1px 2px;cursor:text;background:transparent;
 }
-tbody td.archivo span[contenteditable]:hover{background:rgba(0,0,0,.04);}
-tbody td.archivo span[contenteditable]:focus{background:#fefce8;box-shadow:0 0 0 2px #ca8a04;}
+tbody td.editable span.edit-text:hover{background:rgba(0,0,0,.04);}
+tbody td.editable span.edit-text:focus{background:#fefce8;box-shadow:0 0 0 2px #ca8a04;}
+tbody td.editable.is-edited{background:#fff7ed!important;}
+tbody td.editable.is-edited span.edit-text{box-shadow:inset 3px 0 0 #f59e0b;padding-left:6px;}
+
+select.mov-edit{
+  font-size:11px;font-family:inherit;color:#111827;background:#fff;
+  border:1px solid #d1d5db;border-radius:3px;padding:2px 4px;max-width:280px;
+}
+select.mov-edit:focus{outline:none;border-color:#ca8a04}
+td.mov-cell.is-edited select.mov-edit{border-color:#f59e0b;background:#fff7ed;}
+.edited-flag{font-size:9px;color:#b45309;margin-left:4px;font-weight:700;cursor:help;}
+.revert-btn{background:none;border:none;cursor:pointer;color:#b45309;font-size:10px;margin-left:3px;padding:0;line-height:1;font-weight:700;}
+.revert-btn:hover{color:#78350f;text-decoration:underline;}
 
 /* botón ocultar fila */
 td.col-hide{text-align:center;padding:4px 6px;}
@@ -118,6 +143,7 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
   <h1>Control de Cambios de Servicio Online</h1>
   <span id="hdr-sub">Sube el CSV para comenzar</span>
   <span id="hdr-saved" style="display:none;font-size:10px;color:#86efac;margin-left:8px">● CSV guardado localmente</span>
+  <span id="hdr-sync" style="font-size:10px;color:#d1d5db;margin-left:8px">☁ correcciones: sin configurar</span>
 </header>
 
 <div id="upload-section">
@@ -131,13 +157,19 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
       Abrir consulta en Metabase
     </a>
-    <p class="meta-hint">¿No tienes el CSV todavía? Ábrelo en Metabase y descárgalo desde allí.</p>
+    <p class="meta-hint">¿No tienes el CSV todavía? Ábrelo en Metabase y descárgalo desde allí. La consulta ya trae todo el histórico: aquí solo verás <span id="year-hint">el año actual y el siguiente</span>.</p>
   </div>
   <input type="file" id="file-input" accept=".csv">
 </div>
 
 <div id="main-section" style="display:none">
   <div class="controls">
+    <!-- Año: actual y siguiente -->
+    <span class="lbl">Año</span>
+    <div class="months" id="anios"></div>
+
+    <div class="sep"></div>
+
     <!-- Mes: selección múltiple -->
     <span class="lbl">Mes</span>
     <div class="months" id="months"></div>
@@ -155,11 +187,12 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
 
     <div class="sep"></div>
 
-    <!-- Movimiento -->
+    <!-- Movimiento (selección múltiple) -->
     <span class="lbl">Movimiento</span>
-    <select id="f-mov" class="txt-filter" style="cursor:pointer">
-      <option value="">Todos</option>
-    </select>
+    <div class="ms-wrap" id="mov-ms">
+      <button type="button" class="ms-btn" id="mov-ms-btn">Todos ▾</button>
+      <div class="ms-panel" id="mov-ms-panel"></div>
+    </div>
 
     <div class="sep"></div>
 
@@ -201,6 +234,8 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
     <!-- Acciones -->
     <div class="actions">
       <button class="btn show-hidden" id="btn-show-hidden" style="display:none" title="Mostrar/ocultar filas marcadas">👁 Filas ocultas (<span id="hidden-count">0</span>)</button>
+      <button class="btn ghost" id="btn-restore-backup" style="display:none">↺ Restaurar copia</button>
+      <button class="btn clear-overrides" id="btn-clear-overrides" title="Borra todas las correcciones manuales de Movimiento/Descripción/Archivos">🗑 Borrar correcciones</button>
       <button class="btn clear-filters" id="btn-clear" title="Limpiar todos los filtros activos">✕ Limpiar filtros</button>
       <button class="btn ghost" id="btn-update" style="display:none" title="Sustituir por un CSV nuevo manteniendo la sesión">↺ Actualizar CSV</button>
       <a class="btn meta" href="https://metabase.prod.monline/question/32892-control-de-cambios" target="_blank" title="Abrir consulta en Metabase">
@@ -217,30 +252,157 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script>
+// ══════════════════════════════════════════════════════════════════════════
+// CONFIGURACIÓN JSONBIN — rellena con tus datos (jsonbin.io → tu bin)
+// AVISO: esta clave queda visible en el código fuente de la página. Si vas
+// a publicar este HTML en GitHub Pages (o cualquier sitio público), usa una
+// clave de acceso restringida a este bin (Access Key), no tu Master Key
+// general de la cuenta, para limitar el daño si alguien la copia.
+// ══════════════════════════════════════════════════════════════════════════
+var JSONBIN_BIN_ID  = '6a9a7853f5f4af5e2968e78d';   // <-- pega aquí el ID de tu bin
+var JSONBIN_API_KEY = '';   // opcional — déjalo vacío si tu bin no la necesita
+var JSONBIN_URL = 'https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID;
+
+function jsonbinConfigured(){ return !!JSONBIN_BIN_ID; }
+function jsonbinHeaders(extra){
+  var h = extra ? Object.assign({}, extra) : {};
+  if(JSONBIN_API_KEY) h['X-Master-Key'] = JSONBIN_API_KEY;
+  return h;
+}
+
+function setSyncStatus(text, color){
+  var el = document.getElementById('hdr-sync');
+  if(!el) return;
+  el.textContent = '☁ correcciones: ' + text;
+  el.style.color = color || '#d1d5db';
+}
+
+async function loadOverrides(){
+  if(!jsonbinConfigured()){ setSyncStatus('sin configurar'); return; }
+  setSyncStatus('cargando…', '#fde68a');
+  try{
+    var res = await fetch(JSONBIN_URL + '/latest', { headers: jsonbinHeaders() });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
+    overrides = (data.record && data.record.overrides) || {};
+    setSyncStatus('sincronizado', '#86efac');
+  }catch(e){
+    console.error('JSONBin load error', e);
+    setSyncStatus('error al cargar', '#fca5a5');
+  }
+  render();
+}
+
+var saveTimer = null;
+function scheduleSaveOverrides(){
+  if(!jsonbinConfigured()){ return; }
+  setSyncStatus('guardando…', '#fde68a');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveOverridesNow, 900);
+}
+
+async function saveOverridesNow(){
+  try{
+    var res = await fetch(JSONBIN_URL, {
+      method:'PUT',
+      headers: jsonbinHeaders({ 'Content-Type':'application/json' }),
+      body: JSON.stringify({ overrides: overrides, actualizado: new Date().toISOString() })
+    });
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    setSyncStatus('sincronizado', '#86efac');
+  }catch(e){
+    console.error('JSONBin save error', e);
+    setSyncStatus('error al guardar', '#fca5a5');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// COLUMNAS Y CATEGORÍAS (deben coincidir con el CASE de movimientos_servicio_v3.sql)
+// ══════════════════════════════════════════════════════════════════════════
 var COLS = [
+  {label:'AÑO',          src:'anio', special:'anio'},
   {label:'MES',          src:'mes'},
   {label:'CENTRO',       src:'mercadona_code', special:'centro'},
   {label:'DENOMINACIÓN', src:'denominacion'},
   {label:'POBLACIÓN',    src:'poblacion'},
   {label:'PROVINCIA',    src:'provincia'},
   {label:'ZONA',         src:'zona'},
-  {label:'MOVIMIENTO',   src:'movimiento'},
-  {label:'DESCRIPCIÓN MOVIMIENTO', src:'descripcion_movimiento'},
+  {label:'MOVIMIENTO',   src:'movimiento', editable:'select'},
+  {label:'DESCRIPCIÓN MOVIMIENTO', src:'descripcion_movimiento', editable:'text'},
   {label:'FECHA MOVIMIENTO', src:'fecha_servicio'},
-  {label:'ARCHIVOS',     src:'archivo', calc:true},
+  {label:'ARCHIVOS',     src:'archivo', editable:'text'},
 ];
+
+var MOVIMIENTO_OPTIONS = [
+  'APERTURA COLMENA',
+  'APERTURA TRAS REFORMA',
+  'NUEVA IMPLANTACIÓN',
+  'CIERRE DEL SERVICIO',
+  'CIERRE X REFORMA',
+  'AMPLIACIÓN MODELO + REORGANIZACIÓN CCPP',
+  'AMPLIACIÓN MODELO',
+  'BAJADA MODELO + REORGANIZACIÓN CCPP',
+  'BAJADA MODELO',
+  'REORGANIZACIÓN CCPP'
+];
+
+// Sugerencia de ARCHIVOS por movimiento (simplificada: no reproduce la
+// excepción de "NUEVA IMPLANTACIÓN" con modelo 15/30 sin ampliación posterior
+// en el mismo año — esa la calcula solo la query. Revisa siempre tras aceptar
+// la sugerencia).
+var ARCHIVO_POR_MOVIMIENTO = {
+  'AMPLIACIÓN MODELO': 'GUÍA CAMBIO DE MODELO (Ruta: Biblioteca / Métodos / NTC+NSD / Mantenimiento / 06 Guía cambio de escenario NTC-NSD)',
+  'AMPLIACIÓN MODELO + REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO\nGUÍA CAMBIO DE MODELO (Ruta: Biblioteca / Métodos / NTC+NSD / Mantenimiento / 06 Guía cambio de escenario NTC-NSD)',
+  'NUEVA IMPLANTACIÓN': 'MAPA ÁREA DE SERVICIO\nPLANIFICACIÓN ANUAL',
+  'APERTURA COLMENA': 'MAPA ÁREA DE SERVICIO',
+  'APERTURA TRAS REFORMA': 'MAPA ÁREA DE SERVICIO',
+  'REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO',
+  'BAJADA MODELO + REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO',
+  'BAJADA MODELO': '',
+  'CIERRE DEL SERVICIO': '',
+  'CIERRE X REFORMA': ''
+};
 
 var MONTH_ORDER = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
   'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
 
-var allRows=[], activeMonths=[], activeTipo='ALL', activeMovimiento='',
-    activeZona='', activeRegion='', filterCentro='', filterDesc='',
-    excludedCentros=[], sortColIdx=null, sortDir=1,
-    hiddenRowIds=new Set(), showHidden=true;
+var YEAR_CURRENT = new Date().getFullYear();
+var YEAR_NEXT    = YEAR_CURRENT + 1;
 
-// ID único por fila para poder ocultarlas individualmente
+var allRows=[], activeMonths=[], activeTipo='ALL', activeMovimientos=[],
+    activeZona='', activeRegion='', filterCentro='', filterDesc='',
+    excludedCentros=[], activeAnios=[], sortColIdx=null, sortDir=1,
+    hiddenRowIds=new Set(), showHidden=true, overrides={};
+
+// ID único por fila para poder ocultarlas individualmente (solo de sesión)
 function assignRowIds(rows){
   rows.forEach(function(r,i){ if(!r.__id) r.__id=i; });
+}
+
+// Clave estable de la fila para las correcciones (sobrevive a un CSV nuevo)
+function rowKey(row){
+  return (row['code']||row['mercadona_code']||'') + '|' + (row['fecha_servicio']||'');
+}
+function getOverride(row,field){
+  var k=rowKey(row), o=overrides[k];
+  return (o && o[field]!=null) ? o[field] : null;
+}
+function isOverridden(row,field){
+  var k=rowKey(row), o=overrides[k];
+  return !!(o && o[field]!=null);
+}
+function setOverride(row,field,value){
+  var k=rowKey(row);
+  if(!overrides[k]) overrides[k]={};
+  overrides[k][field]=value;
+  scheduleSaveOverrides();
+}
+function clearOverride(row,field){
+  var k=rowKey(row);
+  if(!overrides[k]) return;
+  delete overrides[k][field];
+  if(Object.keys(overrides[k]).length===0) delete overrides[k];
+  scheduleSaveOverrides();
 }
 
 // ── Parser CSV ──────────────────────────────────────────────────────────────
@@ -279,7 +441,32 @@ function csvToObjects(text){
   return result;
 }
 
-// CAMBIO 1: para PANAL mostrar campo 'code', para el resto 'mercadona_code'
+// Metabase exporta números con formato español (punto de millar: "2.026")
+// y fechas como D/M/YYYY (p.ej. "22/7/2021"), no ISO. Hay que limpiar ambos.
+function getAnioVal(row){
+  var raw=row['anio'];
+  if(raw){
+    var digits=String(raw).replace(/[^0-9]/g,'');
+    if(digits) return digits;
+  }
+  var fecha=row['fecha_servicio']||'';
+  var mSlash=fecha.match(/(\d{4})\s*$/);
+  if(mSlash) return mSlash[1];
+  var mIso=fecha.match(/^(\d{4})-/);
+  if(mIso) return mIso[1];
+  return '';
+}
+
+function parseFechaServicio(str){
+  if(!str) return 0;
+  var m=String(str).match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if(m) return new Date(+m[3], +m[2]-1, +m[1]).getTime();
+  var m2=String(str).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m2) return new Date(+m2[1], +m2[2]-1, +m2[3]).getTime();
+  return 0;
+}
+
+// Para PANAL mostrar campo 'code', para el resto 'mercadona_code'
 function getCentroVal(row){
   if((row['tipo_centro']||'').toUpperCase()==='PANAL'){
     return row['code']||row['mercadona_code']||'';
@@ -289,6 +476,8 @@ function getCentroVal(row){
 
 function getVal(row,col){
   if(col.special==='centro') return getCentroVal(row);
+  if(col.special==='anio')   return getAnioVal(row);
+  if(col.editable)           return getOverride(row,col.src) != null ? getOverride(row,col.src) : (row[col.src]||'');
   return row[col.src]||'';
 }
 
@@ -296,20 +485,23 @@ function filtered(){
   var descLower=filterDesc.trim().toLowerCase();
   var centroLower=filterCentro.trim().toLowerCase();
   var d=allRows.filter(function(r){
-    // CAMBIO 4: filtro multi-mes
+    if(activeAnios.length>0 && activeAnios.indexOf(Number(getAnioVal(r)))===-1) return false;
     if(activeMonths.length>0 && activeMonths.indexOf(r['mes'])===-1) return false;
     if(activeTipo!=='ALL' && (r['tipo_centro']||'').toUpperCase()!==activeTipo) return false;
-    if(activeMovimiento && r['movimiento']!==activeMovimiento) return false;
+    if(activeMovimientos.length>0 && activeMovimientos.indexOf(getVal(r,COLS[7]))===-1) return false;
     if(activeRegion && r['region']!==activeRegion) return false;
     if(activeZona && r['zona']!==activeZona) return false;
     if(centroLower && getCentroVal(r).toLowerCase().indexOf(centroLower)===-1) return false;
-    if(descLower && (r['descripcion_movimiento']||'').toLowerCase().indexOf(descLower)===-1) return false;
+    if(descLower && String(getVal(r,COLS[8])).toLowerCase().indexOf(descLower)===-1) return false;
     if(excludedCentros.length && excludedCentros.indexOf((r['mercadona_code']||'').trim())!==-1) return false;
     return true;
   });
   if(sortColIdx!==null){
     var col=COLS[sortColIdx];
     d=d.slice().sort(function(a,b){
+      if(col.src==='fecha_servicio'){
+        return (parseFechaServicio(getVal(a,col)) - parseFechaServicio(getVal(b,col))) * sortDir;
+      }
       return String(getVal(a,col)).localeCompare(String(getVal(b,col)),'es',{numeric:true})*sortDir;
     });
   }
@@ -317,11 +509,42 @@ function filtered(){
 }
 
 function hasActiveFilters(){
-  return activeMonths.length>0 || activeTipo!=='ALL' || activeMovimiento ||
+  return activeAnios.length>0 || activeMonths.length>0 || activeTipo!=='ALL' || activeMovimientos.length>0 ||
          activeRegion || activeZona || filterCentro.trim() || filterDesc.trim() || excludedCentros.length;
 }
 
-// CAMBIO 4: meses múltiples — clic alterna selección individual
+// Año: actual y siguiente
+function buildAnios(){
+  var el=document.getElementById('anios');
+  el.innerHTML='';
+  function mk(lbl,val){
+    var b=document.createElement('span');
+    var isAll=(val==='__ALL__');
+    var on=isAll?(activeAnios.length===0):(activeAnios.indexOf(val)!==-1);
+    b.className='mbtn'+(on?' on':'');
+    b.textContent=lbl; b.dataset.a=val;
+    b.onclick=function(){
+      if(isAll){
+        activeAnios=[];
+      } else {
+        var idx=activeAnios.indexOf(val);
+        if(idx===-1) activeAnios.push(val);
+        else activeAnios.splice(idx,1);
+      }
+      el.querySelectorAll('.mbtn').forEach(function(x){
+        if(x.dataset.a==='__ALL__') x.classList.toggle('on', activeAnios.length===0);
+        else x.classList.toggle('on', activeAnios.indexOf(+x.dataset.a)!==-1 || activeAnios.indexOf(x.dataset.a)!==-1);
+      });
+      render();
+    };
+    el.appendChild(b);
+  }
+  mk('Todos','__ALL__');
+  mk(String(YEAR_CURRENT), YEAR_CURRENT);
+  mk(String(YEAR_NEXT), YEAR_NEXT);
+}
+
+// Mes: selección múltiple
 function buildMonths(){
   var el=document.getElementById('months');
   var seen={},months=[];
@@ -342,7 +565,6 @@ function buildMonths(){
         if(idx===-1) activeMonths.push(val);
         else activeMonths.splice(idx,1);
       }
-      // actualizar clases
       el.querySelectorAll('.mbtn').forEach(function(x){
         if(x.dataset.m==='__ALL__') x.classList.toggle('on', activeMonths.length===0);
         else x.classList.toggle('on', activeMonths.indexOf(x.dataset.m)!==-1);
@@ -355,22 +577,61 @@ function buildMonths(){
   months.forEach(function(m){mk(m[0]+m.slice(1).toLowerCase(),m);});
 }
 
-function buildMovimientos(){
-  var sel=document.getElementById('f-mov');
-  var seen={},movs=[];
-  allRows.forEach(function(r){var m=r['movimiento'];if(m&&!seen[m]){seen[m]=1;movs.push(m);}});
-  movs.sort(function(a,b){return a.localeCompare(b,'es');});
-  sel.innerHTML='<option value="">Todos</option>';
-  movs.forEach(function(m){
-    var o=document.createElement('option');
-    o.value=m; o.textContent=m[0]+m.slice(1).toLowerCase();
-    sel.appendChild(o);
-  });
-  sel.value=activeMovimiento;
-  sel.onchange=function(){activeMovimiento=sel.value;render();};
+function updateMovBtnLabel(){
+  var btn=document.getElementById('mov-ms-btn');
+  if(!btn) return;
+  if(activeMovimientos.length===0) btn.textContent='Todos ▾';
+  else if(activeMovimientos.length===1) btn.textContent=(activeMovimientos[0][0]+activeMovimientos[0].slice(1).toLowerCase())+' ▾';
+  else btn.textContent=activeMovimientos.length+' seleccionados ▾';
 }
 
-// Filtro Región (solo filtro, no columna en la tabla)
+function buildMovimientos(){
+  // Se usan siempre las 10 categorías reales de la query, aunque el CSV
+  // cargado solo tenga alguna: así puedes preparar el filtro sin depender
+  // de qué haya en los datos actuales.
+  var panel=document.getElementById('mov-ms-panel');
+  var actionsHtml='<div class="ms-panel-actions"><button type="button" id="mov-ms-all">Todos</button><button type="button" id="mov-ms-none">Ninguno</button></div>';
+  var itemsHtml=MOVIMIENTO_OPTIONS.map(function(m){
+    var esc=m.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+    var checked=activeMovimientos.indexOf(m)!==-1?'checked':'';
+    return '<label class="ms-item"><input type="checkbox" value="'+esc+'" '+checked+'> '+m[0]+m.slice(1).toLowerCase()+'</label>';
+  }).join('');
+  panel.innerHTML=actionsHtml+itemsHtml;
+
+  panel.querySelectorAll('input[type=checkbox]').forEach(function(cb){
+    cb.addEventListener('change',function(){
+      if(cb.checked){ if(activeMovimientos.indexOf(cb.value)===-1) activeMovimientos.push(cb.value); }
+      else { activeMovimientos=activeMovimientos.filter(function(x){return x!==cb.value;}); }
+      updateMovBtnLabel();
+      render();
+    });
+  });
+  document.getElementById('mov-ms-all').onclick=function(){
+    activeMovimientos=MOVIMIENTO_OPTIONS.slice();
+    buildMovimientos();
+    updateMovBtnLabel();
+    render();
+  };
+  document.getElementById('mov-ms-none').onclick=function(){
+    activeMovimientos=[];
+    buildMovimientos();
+    updateMovBtnLabel();
+    render();
+  };
+  updateMovBtnLabel();
+}
+
+document.getElementById('mov-ms-btn').onclick=function(e){
+  e.stopPropagation();
+  document.getElementById('mov-ms-panel').classList.toggle('open');
+};
+document.addEventListener('click',function(e){
+  var wrap=document.getElementById('mov-ms');
+  if(wrap && !wrap.contains(e.target)){
+    document.getElementById('mov-ms-panel').classList.remove('open');
+  }
+});
+
 function buildRegiones(){
   var sel=document.getElementById('f-region');
   var seen={},regiones=[];
@@ -386,7 +647,6 @@ function buildRegiones(){
   sel.onchange=function(){activeRegion=sel.value;render();};
 }
 
-// CAMBIO 3: filtro Zona
 function buildZonas(){
   var sel=document.getElementById('f-zona');
   var seen={},zonas=[];
@@ -412,7 +672,6 @@ function buildTipo(){
   });
 }
 
-// Exclusión centros
 function renderExclTags(){
   var c=document.getElementById('excl-tags');
   c.innerHTML='';
@@ -458,14 +717,14 @@ function updateHiddenBtn(){
   btn.title=showHidden?'Ocultar filas marcadas':'Mostrar filas marcadas';
 }
 
-// CAMBIO 2: botón circulo para ocultar fila individual
 function render(){
   var rows=filtered();
   var total=allRows.length;
   var parts=[];
+  if(activeAnios.length>0) parts.push('Año: '+activeAnios.join('+'));
   if(activeMonths.length>0) parts.push(activeMonths.map(function(m){return m[0]+m.slice(1).toLowerCase();}).join('+'));
   if(activeTipo!=='ALL') parts.push(activeTipo);
-  if(activeMovimiento) parts.push(activeMovimiento[0]+activeMovimiento.slice(1).toLowerCase());
+  if(activeMovimientos.length>0) parts.push(activeMovimientos.map(function(m){return m[0]+m.slice(1).toLowerCase();}).join('+'));
   if(activeRegion) parts.push('Región: '+activeRegion);
   if(activeZona) parts.push('Zona: '+activeZona);
   if(filterCentro.trim()) parts.push('Centro: "'+filterCentro.trim()+'"');
@@ -473,8 +732,9 @@ function render(){
   if(excludedCentros.length) parts.push('Excluidos: '+excludedCentros.join(', '));
 
   var visibleRows=rows.filter(function(r){return showHidden||!hiddenRowIds.has(r.__id);});
+  var nCorrecciones=Object.keys(overrides).length;
   var statsEl=document.getElementById('stats');
-  statsEl.innerHTML='<span class="stats-count">'+visibleRows.length+'</span>&nbsp;de '+total+' filas'+(parts.length?' &nbsp;·&nbsp; '+parts.join(' · '):'')+(hiddenRowIds.size>0?' &nbsp;·&nbsp; <span style="color:#7c3aed;font-weight:600">'+hiddenRowIds.size+' marcadas</span>':'');
+  statsEl.innerHTML='<span class="stats-count">'+visibleRows.length+'</span>&nbsp;de '+total+' filas'+(parts.length?' &nbsp;·&nbsp; '+parts.join(' · '):'')+(hiddenRowIds.size>0?' &nbsp;·&nbsp; <span style="color:#7c3aed;font-weight:600">'+hiddenRowIds.size+' marcadas</span>':'')+(nCorrecciones>0?' &nbsp;·&nbsp; <span style="color:#b45309;font-weight:600">'+nCorrecciones+' filas corregidas</span>':'');
 
   document.getElementById('btn-clear').style.display=hasActiveFilters()?'inline-block':'none';
   updateHiddenBtn();
@@ -484,11 +744,14 @@ function render(){
   var thead=document.getElementById('thead');
   thead.innerHTML='<tr><th class="col-hide" title="Marcar/desmarcar filas"></th>'+COLS.map(function(col,i){
     var sc=sortColIdx===i;
-    return '<th class="'+(col.calc?'calc':'')+' '+(sc?(sortDir>0?'asc':'desc'):'')+'" data-i="'+i+'">'+col.label+'<span class="s"></span></th>';
+    return '<th class="'+(sc?(sortDir>0?'asc':'desc'):'')+'" data-i="'+i+'">'+col.label+'<span class="s"></span></th>';
   }).join('')+'</tr>';
   thead.querySelectorAll('th[data-i]').forEach(function(th){
     th.onclick=function(){var i=+th.dataset.i;if(sortColIdx===i)sortDir*=-1;else{sortColIdx=i;sortDir=1;}render();};
   });
+
+  var rowsById={};
+  allRows.forEach(function(r){rowsById[r.__id]=r;});
 
   var tbody=document.getElementById('tbody');
   tbody.innerHTML=rows.map(function(row){
@@ -498,9 +761,20 @@ function render(){
     var cells='<td class="col-hide"><button class="hide-btn" data-rid="'+row.__id+'" title="'+(isHidden?'Quitar marca':'Marcar para ocultar')+'">'+(isHidden?'●':'○')+'</button></td>';
     cells+=COLS.map(function(col){
       var v=getVal(row,col);
-      if(col.calc){
-        var esc=v.replace(/&/g,'&amp;').replace(/</g,'&lt;');
-        return '<td class="archivo"><span contenteditable="true" data-src="'+col.src+'" data-code="'+(row['mercadona_code']||'')+'">'+esc+'</span></td>';
+      if(col.editable==='select'){
+        var edited=isOverridden(row,col.src);
+        var opts=MOVIMIENTO_OPTIONS.slice();
+        if(v && opts.indexOf(v)===-1) opts.unshift(v);
+        var optsHtml=opts.map(function(o){
+          var esc=o.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+          return '<option value="'+esc+'" '+(o===v?'selected':'')+'>'+esc+'</option>';
+        }).join('');
+        return '<td class="mov-cell'+(edited?' is-edited':'')+'" title="'+v.replace(/"/g,'&quot;')+'"><select class="mov-edit" data-rid="'+row.__id+'" data-field="movimiento">'+optsHtml+'</select>'+(edited?'<span class="edited-flag" title="Corregido manualmente">✎</span><button class="revert-btn" data-rid="'+row.__id+'" data-field="movimiento" title="Deshacer, volver al valor de Metabase">↺</button>':'')+'</td>';
+      }
+      if(col.editable==='text'){
+        var edited2=isOverridden(row,col.src);
+        var esc2=v.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+        return '<td class="editable'+(edited2?' is-edited':'')+'"><span class="edit-text" contenteditable="true" data-rid="'+row.__id+'" data-field="'+col.src+'">'+esc2+'</span>'+(edited2?'<span class="edited-flag" title="Corregido manualmente">✎</span><button class="revert-btn" data-rid="'+row.__id+'" data-field="'+col.src+'" title="Deshacer, volver al valor de Metabase">↺</button>':'')+'</td>';
       }
       var cellHtml;
       if(col.src==='descripcion_movimiento' && descTerm){
@@ -513,7 +787,7 @@ function render(){
     return '<tr class="'+trClass+'" data-rid="'+row.__id+'">'+cells+'</tr>';
   }).join('');
 
-  // Eventos botones ocultar fila
+  // Ocultar/mostrar fila
   tbody.querySelectorAll('.hide-btn').forEach(function(btn){
     btn.addEventListener('click',function(e){
       e.stopPropagation();
@@ -524,29 +798,96 @@ function render(){
     });
   });
 
-  // Persistir ediciones en allRows
-  tbody.querySelectorAll('span[contenteditable]').forEach(function(span){
+  // Editar Movimiento (desplegable) → sugiere Archivos si no se ha tocado a mano
+  tbody.querySelectorAll('select.mov-edit').forEach(function(sel){
+    sel.addEventListener('change',function(){
+      var row=rowsById[+sel.dataset.rid];
+      if(!row) return;
+      setOverride(row,'movimiento',sel.value);
+      if(!isOverridden(row,'archivo')){
+        var sugerido=ARCHIVO_POR_MOVIMIENTO[sel.value];
+        if(sugerido!=null) setOverride(row,'archivo',sugerido);
+      }
+      render();
+    });
+  });
+
+  // Editar Descripción / Archivos (texto libre)
+  tbody.querySelectorAll('span.edit-text').forEach(function(span){
     span.addEventListener('blur',function(){
-      var code=span.dataset.code;
-      var src=span.dataset.src;
-      var newVal=span.innerText;
-      allRows.forEach(function(r){if((r['mercadona_code']||'')===code) r[src]=newVal;});
+      var row=rowsById[+span.dataset.rid];
+      if(!row) return;
+      setOverride(row,span.dataset.field,span.innerText);
+      render();
     });
     span.addEventListener('keydown',function(e){if(e.key==='Escape') span.blur();});
   });
+
+  // Deshacer una corrección individual (vuelve al valor de Metabase para ese campo)
+  tbody.querySelectorAll('.revert-btn').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var row=rowsById[+btn.dataset.rid];
+      if(!row) return;
+      clearOverride(row,btn.dataset.field);
+      render();
+    });
+  });
 }
 
-// Botón mostrar/ocultar filas marcadas
 document.getElementById('btn-show-hidden').onclick=function(){
   showHidden=!showHidden;
   render();
 };
 
-// Limpiar filtros
+var OVERRIDES_BACKUP_KEY='cambios2026_overrides_backup';
+
+function updateRestoreBtn(){
+  var btn=document.getElementById('btn-restore-backup');
+  if(!btn) return;
+  var raw=null;
+  try{ raw=localStorage.getItem(OVERRIDES_BACKUP_KEY); }catch(ex){}
+  if(!raw){ btn.style.display='none'; return; }
+  try{
+    var parsed=JSON.parse(raw);
+    var n=Object.keys(parsed.data||{}).length;
+    btn.style.display='inline-block';
+    btn.title='Restaura '+n+' fila(s) corregidas, copia guardada el '+new Date(parsed.ts).toLocaleString('es-ES');
+  }catch(ex){ btn.style.display='none'; }
+}
+
+document.getElementById('btn-restore-backup').onclick=function(){
+  var raw=null;
+  try{ raw=localStorage.getItem(OVERRIDES_BACKUP_KEY); }catch(ex){}
+  if(!raw){ return; }
+  var parsed;
+  try{ parsed=JSON.parse(raw); }catch(ex){ return; }
+  var n=Object.keys(parsed.data||{}).length;
+  if(!confirm('Esto restaurará '+n+' fila(s) corregidas de la copia guardada el '+new Date(parsed.ts).toLocaleString('es-ES')+'.\nSustituirá las correcciones que tengas ahora mismo. ¿Continuar?')) return;
+  overrides=parsed.data||{};
+  scheduleSaveOverrides();
+  render();
+};
+
+document.getElementById('btn-clear-overrides').onclick=function(){
+  var n=Object.keys(overrides).length;
+  if(n===0){ alert('No hay correcciones manuales guardadas todavía.'); return; }
+  var texto=prompt('Vas a borrar '+n+' fila(s) con correcciones manuales de Movimiento/Descripción/Archivos.\nSe guarda una copia de seguridad por si te equivocas (botón "Restaurar copia").\n\nEscribe BORRAR (en mayúsculas) para confirmar:');
+  if(texto!=='BORRAR') return;
+  try{
+    localStorage.setItem(OVERRIDES_BACKUP_KEY, JSON.stringify({data:overrides, ts:new Date().toISOString()}));
+  }catch(ex){}
+  overrides={};
+  scheduleSaveOverrides();
+  render();
+  updateRestoreBtn();
+};
+
 document.getElementById('btn-clear').onclick=function(){
+  activeAnios=[];
   activeMonths=[];
   activeTipo='ALL';
-  activeMovimiento='';
+  activeMovimientos=[];
   activeRegion='';
   activeZona='';
   filterCentro='';
@@ -554,9 +895,10 @@ document.getElementById('btn-clear').onclick=function(){
   excludedCentros=[];
   document.getElementById('f-centro').value='';
   document.getElementById('f-desc').value='';
-  document.getElementById('f-mov').value='';
   document.getElementById('f-region').value='';
   document.getElementById('f-zona').value='';
+  buildAnios();
+  buildMovimientos();
   document.querySelectorAll('#months .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.m==='__ALL__');});
   document.querySelectorAll('#tipo-wrap .mbtn').forEach(function(x){x.classList.toggle('on',x.dataset.tipo==='ALL');});
   renderExclTags();
@@ -572,15 +914,21 @@ function showSaved(){
 }
 
 function initFromText(text,name){
-  allRows=csvToObjects(text);
+  var parsed=csvToObjects(text);
+  // Nos quedamos solo con año actual y siguiente, aunque la query traiga todo el histórico
+  allRows=parsed.filter(function(r){
+    var y=parseInt(getAnioVal(r),10);
+    return y===YEAR_CURRENT || y===YEAR_NEXT;
+  });
   assignRowIds(allRows);
   hiddenRowIds=new Set();
-  document.getElementById('hdr-sub').textContent=allRows.length+' filas · '+name;
+  document.getElementById('hdr-sub').textContent=allRows.length+' filas ('+YEAR_CURRENT+'-'+YEAR_NEXT+') · '+name;
   document.getElementById('upload-section').style.display='none';
   document.getElementById('main-section').style.display='block';
-  activeMonths=[];activeTipo='ALL';activeMovimiento='';activeRegion='';activeZona='';
+  activeAnios=[];activeMonths=[];activeTipo='ALL';activeMovimientos=[];activeRegion='';activeZona='';
   filterCentro='';filterDesc='';
   excludedCentros=[];sortColIdx=null;sortDir=1;showHidden=true;
+  buildAnios();
   buildMonths();
   buildTipo();
   buildMovimientos();
@@ -589,6 +937,7 @@ function initFromText(text,name){
   renderExclTags();
   render();
   showSaved();
+  updateRestoreBtn();
 }
 
 function loadFile(file){
@@ -601,6 +950,11 @@ function loadFile(file){
   };
   reader.readAsText(file,'UTF-8');
 }
+
+document.getElementById('year-hint').textContent=YEAR_CURRENT+' y '+YEAR_NEXT;
+
+// Carga correcciones de JSONBin en paralelo (no depende de tener CSV ya cargado)
+loadOverrides();
 
 (function(){
   try{
@@ -623,12 +977,11 @@ fiUpdate.type='file';fiUpdate.accept='.csv';
 fiUpdate.onchange=function(e){loadFile(e.target.files[0]);fiUpdate.value='';};
 document.getElementById('btn-update').onclick=function(){fiUpdate.click();};
 
-// Exportar Excel
 document.getElementById('btn-export').onclick=function(){
   var rows=filtered().filter(function(r){return !hiddenRowIds.has(r.__id);});
   var headers=COLS.map(function(c){return c.label;});
   var data=[headers].concat(rows.map(function(row){
-    return COLS.map(function(col){return getVal(row,col).replace(/\n/g,' | ');});
+    return COLS.map(function(col){return String(getVal(row,col)).replace(/\n/g,' | ');});
   }));
 
   var ws=XLSX.utils.aoa_to_sheet(data);
@@ -647,13 +1000,14 @@ document.getElementById('btn-export').onclick=function(){
   ws['!rows']=[{hpt:18}];
   ws['!cols']=COLS.map(function(col){
     var max=col.label.length;
-    rows.slice(0,300).forEach(function(r){var v=getVal(r,col).replace(/\n/g,' | ');if(v.length>max) max=v.length;});
+    rows.slice(0,300).forEach(function(r){var v=String(getVal(r,col)).replace(/\n/g,' | ');if(v.length>max) max=v.length;});
     return {wch:Math.min(max+2,60)};
   });
 
   var wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'Cambios Servicio Online');
   var suffix='';
+  if(activeAnios.length>0) suffix+='_'+activeAnios.join('-');
   if(activeMonths.length>0) suffix+='_'+activeMonths.join('-');
   if(activeTipo!=='ALL') suffix+='_'+activeTipo;
   if(activeRegion) suffix+='_'+activeRegion;
