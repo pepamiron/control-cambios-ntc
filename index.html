@@ -45,6 +45,10 @@ header span{font-size:11px;color:#9ca3af;margin-left:auto}
 .btn.show-hidden:hover{background:#ddd6fe}
 .btn.publish{background:#0e7490;color:#fff;border-color:#155e75;font-weight:600}
 .btn.publish:hover{background:#155e75}
+.btn.only-ovr{background:#fff;color:#b45309;border-color:#fcd34d;font-weight:600}
+.btn.only-ovr:hover{background:#fffbeb}
+.btn.only-ovr.on{background:#b45309;color:#fff;border-color:#92400e}
+.stats-ovr{cursor:pointer;text-decoration:underline dotted}
 .btn.clear-overrides{background:#fee2e2;color:#991b1b;border-color:#fca5a5;font-weight:600}
 .btn.clear-overrides:hover{background:#fecaca}
 
@@ -239,6 +243,7 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
     <div class="actions">
       <button class="btn show-hidden" id="btn-show-hidden" style="display:none" title="Mostrar/ocultar filas marcadas">👁 Filas ocultas (<span id="hidden-count">0</span>)</button>
       <button class="btn ghost" id="btn-restore-backup" style="display:none">↺ Restaurar copia</button>
+      <button class="btn only-ovr" id="btn-only-ovr" title="Ver solo las filas que has corregido">✏ Solo corregidas</button>
       <button class="btn clear-overrides" id="btn-clear-overrides" title="Borra todas las correcciones manuales de Movimiento/Descripción/Archivos">🗑 Borrar correcciones</button>
       <button class="btn clear-filters" id="btn-clear" title="Limpiar todos los filtros activos">✕ Limpiar filtros</button>
       <button class="btn ghost" id="btn-update" style="display:none" title="Sustituir por un CSV nuevo manteniendo la sesión">↺ Actualizar CSV</button>
@@ -497,7 +502,7 @@ var YEAR_NEXT    = YEAR_CURRENT + 1;
 var allRows=[], activeMonths=[], activeTipo='ALL', activeMovimientos=[],
     activeZona='', activeRegion='', filterCentro='', filterDesc='',
     excludedCentros=[], activeAnios=[], sortColIdx=null, sortDir=1,
-    hiddenRowIds=new Set(), showHidden=true, overrides={};
+    hiddenRowIds=new Set(), showHidden=true, overrides={}, soloCorregidas=false;
 
 // ID único por fila para poder ocultarlas individualmente (solo de sesión)
 function assignRowIds(rows){
@@ -619,6 +624,7 @@ function filtered(){
     if(centroLower && getCentroVal(r).toLowerCase().indexOf(centroLower)===-1) return false;
     if(descLower && String(getVal(r,COLS[8])).toLowerCase().indexOf(descLower)===-1) return false;
     if(excludedCentros.length && excludedCentros.indexOf((r['mercadona_code']||'').trim())!==-1) return false;
+    if(soloCorregidas && !overrides[rowKey(r)]) return false;
     return true;
   });
   if(sortColIdx!==null){
@@ -635,7 +641,7 @@ function filtered(){
 
 function hasActiveFilters(){
   return activeAnios.length>0 || activeMonths.length>0 || activeTipo!=='ALL' || activeMovimientos.length>0 ||
-         activeRegion || activeZona || filterCentro.trim() || filterDesc.trim() || excludedCentros.length;
+         activeRegion || activeZona || filterCentro.trim() || filterDesc.trim() || excludedCentros.length || soloCorregidas;
 }
 
 // Año: actual y siguiente
@@ -859,7 +865,12 @@ function render(){
   var visibleRows=rows.filter(function(r){return showHidden||!hiddenRowIds.has(r.__id);});
   var nCorrecciones=Object.keys(overrides).length;
   var statsEl=document.getElementById('stats');
-  statsEl.innerHTML='<span class="stats-count">'+visibleRows.length+'</span>&nbsp;de '+total+' filas'+(parts.length?' &nbsp;·&nbsp; '+parts.join(' · '):'')+(hiddenRowIds.size>0?' &nbsp;·&nbsp; <span style="color:#7c3aed;font-weight:600">'+hiddenRowIds.size+' marcadas</span>':'')+(nCorrecciones>0?' &nbsp;·&nbsp; <span style="color:#b45309;font-weight:600">'+nCorrecciones+' filas corregidas</span>':'');
+  statsEl.innerHTML='<span class="stats-count">'+visibleRows.length+'</span>&nbsp;de '+total+' filas'+(parts.length?' &nbsp;·&nbsp; '+parts.join(' · '):'')+(hiddenRowIds.size>0?' &nbsp;·&nbsp; <span style="color:#7c3aed;font-weight:600">'+hiddenRowIds.size+' marcadas</span>':'')+(nCorrecciones>0?' &nbsp;·&nbsp; <span class="stats-ovr" id="stats-ovr" title="Pulsa para ver solo estas filas" style="color:#b45309;font-weight:600">'+nCorrecciones+' filas corregidas</span>':'');
+
+  var so=document.getElementById('stats-ovr');
+  if(so) so.onclick=toggleSoloCorregidas;
+  var bo=document.getElementById('btn-only-ovr');
+  if(bo){ bo.className='btn only-ovr'+(soloCorregidas?' on':''); }
 
   document.getElementById('btn-clear').style.display=hasActiveFilters()?'inline-block':'none';
   updateHiddenBtn();
@@ -994,6 +1005,16 @@ document.getElementById('btn-restore-backup').onclick=function(){
   render();
 };
 
+function toggleSoloCorregidas(){
+  if(!soloCorregidas && Object.keys(overrides).length===0){
+    alert('No hay correcciones manuales todavía.');
+    return;
+  }
+  soloCorregidas=!soloCorregidas;
+  render();
+}
+document.getElementById('btn-only-ovr').onclick=toggleSoloCorregidas;
+
 document.getElementById('btn-clear-overrides').onclick=function(){
   var n=Object.keys(overrides).length;
   if(n===0){ alert('No hay correcciones manuales guardadas todavía.'); return; }
@@ -1017,6 +1038,7 @@ document.getElementById('btn-clear').onclick=function(){
   filterCentro='';
   filterDesc='';
   excludedCentros=[];
+  soloCorregidas=false;
   document.getElementById('f-centro').value='';
   document.getElementById('f-desc').value='';
   document.getElementById('f-region').value='';
@@ -1052,7 +1074,7 @@ function initFromText(text,name){
   document.getElementById('main-section').style.display='block';
   activeAnios=[];activeMonths=[];activeTipo='ALL';activeMovimientos=[];activeRegion='';activeZona='';
   filterCentro='';filterDesc='';
-  excludedCentros=[];sortColIdx=null;sortDir=1;showHidden=true;
+  excludedCentros=[];sortColIdx=null;sortDir=1;showHidden=true;soloCorregidas=false;
   buildAnios();
   buildMonths();
   buildTipo();
