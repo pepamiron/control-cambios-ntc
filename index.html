@@ -939,7 +939,12 @@ function render(){
     sel.addEventListener('change',function(){
       var row=rowsById[+sel.dataset.rid];
       if(!row) return;
-      setOverride(row,'movimiento',sel.value);
+      if(sel.value===(row['movimiento']||'')){
+        // Ha vuelto al valor de Metabase: deja de ser una corrección
+        clearOverride(row,'movimiento');
+      }else{
+        setOverride(row,'movimiento',sel.value);
+      }
       if(!isOverridden(row,'archivo')){
         var sugerido=ARCHIVO_POR_MOVIMIENTO[sel.value];
         if(sugerido!=null) setOverride(row,'archivo',sugerido);
@@ -953,7 +958,19 @@ function render(){
     span.addEventListener('blur',function(){
       var row=rowsById[+span.dataset.rid];
       if(!row) return;
-      setOverride(row,span.dataset.field,span.innerText);
+      var campo=span.dataset.field;
+      var nuevo=span.innerText.replace(/\u00a0/g,' ').trim();   // el contenteditable mete &nbsp;
+      var original=(row[campo]||'').trim();                      // valor de Metabase
+      var previo=getOverride(row,campo);
+
+      if(nuevo===original){
+        // Ha vuelto al valor original (o no ha tocado nada): no es una corrección.
+        // Si había una corrección previa, se retira y la fila deja de estar marcada.
+        if(previo!=null){ clearOverride(row,campo); render(); }
+        return;
+      }
+      if(previo!=null && nuevo===String(previo).trim()) return;   // sin cambios respecto a lo ya guardado
+      setOverride(row,campo,nuevo);
       render();
     });
     span.addEventListener('keydown',function(e){if(e.key==='Escape') span.blur();});
