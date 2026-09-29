@@ -6,11 +6,23 @@
 <title>Control de Cambios de Servicio Online</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Segoe UI",system-ui,sans-serif;background:#f0f0f0;color:#1e2532;font-size:12px}
-header{background:#14532d;padding:10px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,.3);flex-wrap:wrap}
-header h1{font-size:14px;font-weight:600;color:#fff}
-header span{font-size:11px;color:#9ca3af;margin-left:auto}
-#upload-section{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 45px)}
+html,body{height:100%}
+body{font-family:"Segoe UI",system-ui,sans-serif;background:#f0f0f0;color:#1e2532;font-size:12px;display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+header{flex-shrink:0}
+#main-section{flex:1;min-height:0;flex-direction:column}
+#main-section>.panel-toggle,#main-section>.stats{flex-shrink:0}
+#panel-cuerpo{flex-shrink:0;max-height:42vh;max-height:42dvh;overflow:auto;border-bottom:1px solid #e5e7eb}
+#panel-cuerpo>.controls:last-child{border-bottom:0}
+#main-section>.wrap{flex:1;min-height:0;max-height:none}
+header{background:#14532d;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:nowrap;border-bottom:1px solid #0f3d21}
+.hdr-logo{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);display:grid;place-items:center;flex-shrink:0;color:#86efac}
+.hdr-titles{display:flex;flex-direction:column;gap:2px;min-width:0;flex-shrink:0;max-width:50%}
+.hdr-titles>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+header h1{font-size:15px;font-weight:600;color:#fff;letter-spacing:.005em}
+#hdr-sub{font-size:11.5px;color:#a7c4b2}
+.hdr-status{margin-left:auto;display:flex;gap:6px;flex-wrap:nowrap;align-items:center;min-width:0;justify-content:flex-end}
+.pill{font-size:11px;line-height:1;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.08);white-space:nowrap;color:#d1d5db;min-width:0;overflow:hidden;text-overflow:ellipsis}
+#upload-section{display:flex;align-items:center;justify-content:center;flex:1;min-height:0;overflow:auto;padding:16px}
 .upload-box{display:flex;flex-direction:column;align-items:center;gap:16px;max-width:440px;width:100%}
 .drop{border:2px dashed #c4c9d8;border-radius:14px;padding:48px 40px;text-align:center;background:#fff;cursor:pointer;transition:all .15s;width:100%}
 .drop:hover,.drop.drag{border-color:#2563eb;background:#eff4ff}
@@ -22,70 +34,114 @@ header span{font-size:11px;color:#9ca3af;margin-left:auto}
 .meta-hint{font-size:11px;color:#6b7280;text-align:center;line-height:1.6}
 
 /* toolbar */
-.panel-toggle{background:#f9fafb;border-bottom:1px solid #e5e7eb;padding:3px 12px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:22}
-.pt-btn{background:none;border:0;cursor:pointer;font-size:11px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.04em;padding:3px 0;display:flex;align-items:center;gap:5px}
-.pt-btn:hover{color:#111827}
-.pt-caret{display:inline-block;transition:transform .15s;font-size:10px}
+.panel-toggle{background:#fff;border-bottom:1px solid #e5e7eb;padding:0 20px;height:34px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:22}
+.pt-btn{background:none;border:0;cursor:pointer;font-size:11px;font-weight:700;color:#14532d;text-transform:uppercase;letter-spacing:.06em;padding:4px 8px 4px 0;display:flex;align-items:center;gap:6px;font-family:inherit}
+.pt-btn:hover{color:#0f3d21}
+.pt-caret{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:4px;background:#ecf3ee;transition:transform .15s;font-size:10px}
 .pt-btn[aria-expanded="false"] .pt-caret{transform:rotate(-90deg)}
-.pt-resumen{font-size:11px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.controls{background:#fff;border-bottom:1px solid #d1d5db;padding:7px 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;position:sticky;top:0;z-index:20;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.controls.acciones{box-shadow:none;padding-top:6px;padding-bottom:6px;background:#fcfcfd}
-.grp-lbl{font-size:9.5px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-right:1px}
+.pt-resumen{font-size:11.5px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.controls{background:#fff;border-bottom:1px solid #e5e7eb;padding:12px 20px 14px;display:flex;align-items:flex-end;gap:14px 22px;flex-wrap:wrap;position:relative;z-index:20}
+.controls.acciones{background:#f7f9f8;padding:9px 20px;align-items:center;gap:8px 18px}
+.fld{display:flex;flex-direction:column;gap:6px;min-width:0}
+.grp{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.grp-lbl{font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.07em;font-weight:700;margin-right:2px}
 body.panel-oculto #banda-filtros,body.panel-oculto #banda-acciones{display:none}
-.lbl{font-size:10px;color:#6b7280;font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
-.sep{width:1px;height:22px;background:#e5e7eb;flex-shrink:0}
-.months{display:flex;flex-wrap:wrap;gap:4px}
-.mbtn{font-size:11px;padding:2px 10px;border-radius:3px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;user-select:none;color:#374151;transition:all .1s}
-.mbtn:hover{background:#e5e7eb}
-.mbtn.on{background:#14532d;color:#fff;border-color:#14532d}
-.tipo-wrap{display:flex;gap:4px}
-.actions{margin-left:auto;display:flex;gap:5px;align-items:center}
+.lbl{font-size:10px;color:#6b7280;font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.07em}
+.sep{width:1px;height:20px;background:#dfe4e1;flex-shrink:0}
+.months,.tipo-wrap{display:inline-flex;flex-wrap:wrap;gap:2px;background:#f1f4f2;border:1px solid #e3e8e5;border-radius:7px;padding:2px}
+.mbtn{font-size:11.5px;line-height:1;padding:6px 10px;border-radius:5px;border:0;background:transparent;cursor:pointer;user-select:none;color:#374151;transition:background .1s,color .1s;white-space:nowrap}
+.mbtn:hover{background:#e3e9e5;color:#111827}
+.mbtn.on{background:#14532d;color:#fff;box-shadow:0 1px 2px rgba(15,61,33,.3)}
+.actions{display:flex;gap:8px 18px;align-items:center;flex-wrap:wrap;width:100%}
+.actions .out{margin-left:auto}
 .btn{font-size:11px;padding:4px 12px;border-radius:3px;border:1px solid #d1d5db;background:#f9fafb;cursor:pointer;color:#374151;white-space:nowrap}
 .btn:hover{background:#e5e7eb}
+.controls .btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:6px;font-size:11.5px;font-weight:500;font-family:inherit;border:1px solid #d6dbd8;background:#fff;color:#374151;text-decoration:none;transition:background .1s,border-color .1s}
+.controls .btn:hover{background:#f3f5f4;border-color:#c3cac6}
 .btn.excel{background:#217346;color:#fff;border-color:#1a5c38}
 .btn.excel:hover{background:#1a5c38}
+.controls .btn.excel{background:#217346;color:#fff;border-color:#1a5c38;font-weight:600}
+.controls .btn.excel:hover{background:#1a5c38}
 .btn.ghost{color:#9ca3b0;border-color:#e5e7eb}
+.controls .btn.ghost{color:#4b5563}
 .btn.meta{background:#2563eb;color:#fff;border-color:#1d4ed8;text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:4px 10px}
 .btn.meta:hover{background:#1d4ed8}
+.controls .btn.meta{background:#fff;color:#1d4ed8;border-color:#c7d6f5}
+.controls .btn.meta:hover{background:#eff4ff;border-color:#93b0ec}
 .btn.meta.big{padding:8px 18px;font-size:12px;border-radius:6px}
-.btn.clear-filters{background:#fef3c7;color:#92400e;border-color:#fcd34d;font-weight:600}
-.btn.clear-filters:hover{background:#fde68a}
-.btn.show-hidden{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;font-weight:600}
-.btn.show-hidden:hover{background:#ddd6fe}
-.btn.edit-mode{background:#fff;color:#475569;border-color:#cbd5e1;font-weight:600}
-.btn.edit-mode.on{background:#15803d;color:#fff;border-color:#166534}
+.controls .btn.clear-filters{margin-left:auto;background:#fffbeb;color:#92400e;border-color:#fcd34d;font-weight:600}
+.controls .btn.clear-filters:hover{background:#fef3c7}
+.controls .btn.show-hidden{background:#f5f3ff;color:#5b21b6;border-color:#c4b5fd;font-weight:600}
+.controls .btn.show-hidden:hover{background:#ede9fe}
+.controls .btn.edit-mode{color:#475569;font-weight:600}
+.controls .btn.edit-mode.on{background:#15803d;color:#fff;border-color:#166534}
 tbody td.editable.locked span.edit-text{cursor:default;}
 tbody td.editable.locked span.edit-text:hover{background:transparent;}
 tbody select.mov-edit[disabled]{background:transparent;border-color:transparent;color:inherit;appearance:none;cursor:default;}
-.btn.only-ovr{background:#fff;color:#b45309;border-color:#fcd34d;font-weight:600}
-.btn.only-ovr:hover{background:#fffbeb}
-.btn.only-ovr.on{background:#b45309;color:#fff;border-color:#92400e}
+.controls .btn.only-ovr{color:#b45309;border-color:#f5d68a;font-weight:600}
+.controls .btn.only-ovr:hover{background:#fffbeb}
+.controls .btn.only-ovr.on{background:#b45309;color:#fff;border-color:#92400e}
 .stats-ovr{cursor:pointer;text-decoration:underline dotted}
-.btn.clear-overrides{background:#fee2e2;color:#991b1b;border-color:#fca5a5;font-weight:600}
-.btn.clear-overrides:hover{background:#fecaca}
+.controls .btn.clear-overrides{color:#b91c1c;border-color:#f3c0c0;font-weight:600}
+.controls .btn.clear-overrides:hover{background:#fef2f2;border-color:#fca5a5}
 
 mark{background:#fef08a;color:#713f12;border-radius:2px;padding:0 1px}
 
-.txt-filter{font-size:11px;padding:3px 7px;border:1px solid #d1d5db;border-radius:3px;font-family:inherit;color:#374151;background:#f9fafb}
-.txt-filter:focus{outline:none;border-color:#2563eb;background:#fff}
+.txt-filter{font-size:11.5px;height:30px;padding:0 9px;border:1px solid #d6dbd8;border-radius:6px;font-family:inherit;color:#1f2937;background:#fff;transition:border-color .1s,box-shadow .1s}
+.txt-filter:hover{border-color:#b9c2bd}
+.txt-filter:focus,#excl-input:focus{outline:none;border-color:#15803d;box-shadow:0 0 0 3px rgba(21,128,61,.14)}
+select.txt-filter{min-width:120px;padding-right:4px}
+.inp-ico{position:relative;display:flex;align-items:center}
+.inp-ico svg{position:absolute;left:9px;color:#9ca3af;pointer-events:none}
+.inp-ico .txt-filter{padding-left:28px}
 
-.excl-wrap{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
-#excl-input{font-size:11px;padding:3px 7px;border:1px solid #d1d5db;border-radius:3px;width:90px;font-family:inherit}
-#excl-input:focus{outline:none;border-color:#2563eb}
-.excl-tag{display:inline-flex;align-items:center;gap:2px;background:#fee2e2;color:#991b1b;border-radius:3px;padding:1px 6px;font-size:10px;font-weight:600}
-.excl-tag button{background:none;border:none;cursor:pointer;color:#991b1b;font-size:11px;padding:0;line-height:1;margin-left:1px}
+.excl-wrap{display:flex;align-items:center;gap:4px;flex-wrap:wrap;min-height:30px;padding:0 4px 0 0;border:1px solid #d6dbd8;border-radius:6px;background:#fff}
+#excl-input{font-size:11.5px;height:28px;padding:0 9px;border:0;border-radius:6px;width:110px;font-family:inherit;background:transparent}
+#excl-input:focus{box-shadow:none}
+#excl-tags{display:flex;gap:4px;flex-wrap:wrap}
+.excl-tag{display:inline-flex;align-items:center;gap:3px;background:#fee2e2;color:#991b1b;border-radius:4px;padding:3px 6px;font-size:10.5px;font-weight:600}
+.excl-tag button{background:none;border:none;cursor:pointer;color:#991b1b;font-size:12px;padding:0;line-height:1;margin-left:1px}
 
 .ms-wrap{position:relative}
-.ms-btn{font-size:11px;padding:3px 10px;border:1px solid #d1d5db;border-radius:3px;background:#f9fafb;cursor:pointer;color:#374151;white-space:nowrap}
-.ms-btn:hover{background:#e5e7eb}
-.ms-panel{position:absolute;top:100%;left:0;margin-top:3px;background:#fff;border:1px solid #d1d5db;border-radius:4px;box-shadow:0 4px 14px rgba(0,0,0,.18);padding:6px;z-index:30;display:none;min-width:280px;max-height:280px;overflow:auto}
+.ms-btn{font-size:11.5px;height:30px;padding:0 10px;min-width:150px;text-align:left;border:1px solid #d6dbd8;border-radius:6px;background:#fff;cursor:pointer;color:#1f2937;white-space:nowrap;font-family:inherit}
+.ms-btn:hover{border-color:#b9c2bd}
+.ms-panel{position:fixed;top:0;left:0;background:#fff;border:1px solid #d6dbd8;border-radius:8px;box-shadow:0 8px 24px rgba(15,23,42,.14);padding:6px;z-index:30;display:none;min-width:280px;max-height:300px;overflow:auto}
 .ms-panel.open{display:block}
 .ms-panel-actions{display:flex;gap:6px;padding:0 2px 6px;margin-bottom:4px;border-bottom:1px solid #e5e7eb}
-.ms-panel-actions button{font-size:10px;padding:2px 8px;border:1px solid #d1d5db;border-radius:3px;background:#f9fafb;cursor:pointer;color:#374151}
-.ms-panel-actions button:hover{background:#e5e7eb}
-.ms-item{display:flex;align-items:center;gap:6px;font-size:11px;padding:3px 5px;border-radius:3px;cursor:pointer;white-space:nowrap;color:#374151}
-.ms-item:hover{background:#f3f4f6}
-.ms-item input{cursor:pointer;margin:0}
+.ms-panel-actions button{font-size:10.5px;padding:3px 9px;border:1px solid #d6dbd8;border-radius:5px;background:#fff;cursor:pointer;color:#374151;font-family:inherit}
+.ms-panel-actions button:hover{background:#f3f5f4}
+.ms-item{display:flex;align-items:center;gap:8px;font-size:11.5px;padding:5px 6px;border-radius:5px;cursor:pointer;white-space:nowrap;color:#374151}
+.ms-item:hover{background:#f1f4f2}
+.ms-item input{cursor:pointer;margin:0;accent-color:#15803d}
+.ms-panel{max-width:calc(100vw - 24px)}
+@media (max-height:760px){
+  header{padding:8px 20px}
+  .hdr-logo{width:30px;height:30px}
+  .controls{padding:8px 20px 10px;gap:10px 18px}
+  .controls.acciones{padding:6px 20px}
+  .fld{gap:4px}
+}
+@media (max-width:900px){
+  header{padding:10px 14px;gap:10px}
+  .panel-toggle,.controls,.controls.acciones,.stats{padding-left:14px;padding-right:14px}
+  .actions .out{margin-left:0}
+  .sep{display:none}
+}
+@media (max-width:600px){
+  header{flex-wrap:wrap}
+  .hdr-titles{max-width:100%}
+  .hdr-status{margin-left:0;width:100%;justify-content:flex-start;flex-wrap:wrap}
+  #panel-cuerpo{max-height:40vh;max-height:40dvh}
+  header h1{font-size:14px}
+  .hdr-logo{width:30px;height:30px}
+  .pill{font-size:10px;padding:5px 8px}
+  .controls{gap:10px 14px}
+  .fld{flex:1 1 140px}
+  .fld .txt-filter,.fld .inp-ico,.fld .ms-btn,.fld .excl-wrap{width:100%!important}
+  .inp-ico .txt-filter{width:100%!important}
+  .controls .btn.clear-filters{margin-left:0}
+  .stats{flex-wrap:wrap;row-gap:2px}
+}
 
 .stats{font-size:11px;color:#6b7280;padding:4px 12px;background:#f9fafb;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:8px}
 .stats-count{font-weight:700;color:#14532d}
@@ -158,6 +214,8 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
 /* ── Generador de correos ── */
 .btn.mail{background:#14532d;color:#fff;border-color:#0f3d21;font-weight:600}
 .btn.mail:hover{background:#0f3d21}
+.controls .btn.mail{background:#14532d;color:#fff;border-color:#0f3d21;font-weight:600}
+.controls .btn.mail:hover{background:#0f3d21}
 .mail-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto}
 .mail-box{background:#fff;border-radius:8px;width:100%;max-width:1100px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
 .mail-head{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#14532d;color:#fff;border-radius:8px 8px 0 0}
@@ -187,12 +245,17 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
 </head>
 <body>
 <header>
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#86efac" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-  <h1>Control de Cambios de Servicio Online</h1>
-  <span id="hdr-sub">Sube el CSV para comenzar</span>
-  <span id="hdr-saved" style="display:none;font-size:10px;color:#86efac;margin-left:8px">● CSV guardado localmente</span>
-  <span id="hdr-sync" style="font-size:10px;color:#d1d5db;margin-left:8px">☁ correcciones: sin configurar</span>
-  <span id="hdr-csv" style="font-size:10px;color:#d1d5db;margin-left:8px">☁ CSV: sin configurar</span>
+  <div class="hdr-logo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+  <div class="hdr-titles">
+    <h1>Control de Cambios de Servicio Online</h1>
+    <span id="hdr-sub">Sube el CSV para comenzar</span>
+  </div>
+  <div class="hdr-status">
+    <span id="hdr-saved" class="pill" style="display:none;color:#86efac">● CSV guardado localmente</span>
+    <span id="hdr-sync" class="pill">☁ correcciones: sin configurar</span>
+    <span id="hdr-csv" class="pill">☁ CSV: sin configurar</span>
+  </div>
+
 </header>
 
 <div id="upload-section">
@@ -219,98 +282,70 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
     <span class="pt-resumen" id="pt-resumen"></span>
   </div>
 
+  <div id="panel-cuerpo">
   <div class="controls" id="banda-filtros">
-    <!-- Año: actual y siguiente -->
-    <span class="lbl">Año</span>
-    <div class="months" id="anios"></div>
-
-    <div class="sep"></div>
-
-    <!-- Mes: selección múltiple -->
-    <span class="lbl">Mes</span>
-    <div class="months" id="months"></div>
-
-    <div class="sep"></div>
-
-    <!-- Tipo -->
-    <span class="lbl">Tipo</span>
-    <div class="tipo-wrap" id="tipo-wrap">
-      <span class="mbtn on" data-tipo="ALL">Todos</span>
-      <span class="mbtn" data-tipo="TIENDA">Tienda</span>
-      <span class="mbtn" data-tipo="COLMENA">Colmena</span>
-      <span class="mbtn" data-tipo="PANAL">Panal</span>
+    <div class="fld"><span class="lbl">Año</span><div class="months" id="anios"></div></div>
+    <div class="fld"><span class="lbl">Mes</span><div class="months" id="months"></div></div>
+    <div class="fld"><span class="lbl">Tipo</span>
+      <div class="tipo-wrap" id="tipo-wrap">
+        <span class="mbtn on" data-tipo="ALL">Todos</span>
+        <span class="mbtn" data-tipo="TIENDA">Tienda</span>
+        <span class="mbtn" data-tipo="COLMENA">Colmena</span>
+        <span class="mbtn" data-tipo="PANAL">Panal</span>
+      </div>
     </div>
-
-    <div class="sep"></div>
-
-    <!-- Movimiento (selección múltiple) -->
-    <span class="lbl">Movimiento</span>
-    <div class="ms-wrap" id="mov-ms">
-      <button type="button" class="ms-btn" id="mov-ms-btn">Todos ▾</button>
-      <div class="ms-panel" id="mov-ms-panel"></div>
+    <div class="fld"><span class="lbl">Movimiento</span>
+      <div class="ms-wrap" id="mov-ms">
+        <button type="button" class="ms-btn" id="mov-ms-btn">Todos ▾</button>
+        <div class="ms-panel" id="mov-ms-panel"></div>
+      </div>
     </div>
-
-    <div class="sep"></div>
-
-    <!-- Región -->
-    <span class="lbl">Región</span>
-    <select id="f-region" class="txt-filter" style="cursor:pointer">
-      <option value="">Todas</option>
-    </select>
-
-    <div class="sep"></div>
-
-    <!-- Zona -->
-    <span class="lbl">Zona</span>
-    <select id="f-zona" class="txt-filter" style="cursor:pointer">
-      <option value="">Todas</option>
-    </select>
-
-    <div class="sep"></div>
-
-    <!-- Filtro Centro -->
-    <span class="lbl">Centro</span>
-    <input type="text" id="f-centro" class="txt-filter" placeholder="Código…" style="width:80px" title="Filtra por código de centro (contiene)">
-
-    <div class="sep"></div>
-
-    <!-- Filtro Descripción -->
-    <span class="lbl">Descripción</span>
-    <input type="text" id="f-desc" class="txt-filter" placeholder="Buscar texto…" style="width:130px" title="Busca por texto en la descripción del movimiento">
-
-    <div class="sep"></div>
-
-    <!-- Excluir centros -->
-    <span class="lbl">Excluir</span>
-    <div class="excl-wrap" id="excl-wrap">
-      <input type="text" id="excl-input" placeholder="Código centro…" title="Escribe un código y pulsa Enter">
-      <div id="excl-tags"></div>
+    <div class="fld"><span class="lbl">Región</span>
+      <select id="f-region" class="txt-filter" style="cursor:pointer"><option value="">Todas</option></select>
     </div>
-
-    <!-- Acciones -->
-    <button class="btn clear-filters" style="margin-left:auto" id="btn-clear" title="Limpiar todos los filtros activos">✕ Limpiar filtros</button>
+    <div class="fld"><span class="lbl">Zona</span>
+      <select id="f-zona" class="txt-filter" style="cursor:pointer"><option value="">Todas</option></select>
+    </div>
+    <div class="fld"><span class="lbl">Centro</span>
+      <div class="inp-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input type="text" id="f-centro" class="txt-filter" placeholder="Código…" style="width:110px" title="Filtra por código de centro (contiene)"></div>
+    </div>
+    <div class="fld"><span class="lbl">Descripción</span>
+      <div class="inp-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input type="text" id="f-desc" class="txt-filter" placeholder="Buscar texto…" style="width:170px" title="Busca por texto en la descripción del movimiento"></div>
+    </div>
+    <div class="fld"><span class="lbl">Excluir centros</span>
+      <div class="excl-wrap" id="excl-wrap">
+        <input type="text" id="excl-input" placeholder="Código + Enter" title="Escribe un código y pulsa Enter">
+        <div id="excl-tags"></div>
+      </div>
+    </div>
+    <button class="btn clear-filters" id="btn-clear" title="Limpiar todos los filtros activos"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg> Limpiar filtros</button>
   </div><!-- /banda filtros -->
 
-  <!-- Banda de acciones -->
   <div class="controls acciones" id="banda-acciones">
     <div class="actions">
-      <button class="btn show-hidden" id="btn-show-hidden" style="display:none" title="Mostrar/ocultar filas marcadas">👁 Filas ocultas (<span id="hidden-count">0</span>)</button>
-      <button class="btn ghost" id="btn-restore-backup" style="display:none">↺ Restaurar copia</button>
-      <button class="btn edit-mode" id="btn-edit-mode" title="Bloquear o permitir la edición de celdas">🔒 Edición bloqueada</button>
-      <button class="btn only-ovr" id="btn-only-ovr" title="Ver solo las filas que has corregido">✏ Solo corregidas</button>
-      <button class="btn clear-overrides" id="btn-clear-overrides" title="Borra todas las correcciones manuales de Movimiento/Descripción/Archivos">🗑 Borrar correcciones</button>
-      <span class="grp-lbl">Datos</span>
-      <button class="btn ghost" id="btn-update" style="display:none" title="Sustituir por un CSV nuevo manteniendo la sesión">↺ Actualizar CSV</button>
-      <a class="btn meta" href="https://metabase.prod.monline/question/32892-control-de-cambios" target="_blank" title="Abrir consulta en Metabase">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        Metabase
-      </a>
+      <div class="grp">
+        <span class="grp-lbl">Revisión</span>
+        <button class="btn edit-mode" id="btn-edit-mode" title="Bloquear o permitir la edición de celdas"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Edición bloqueada</button>
+        <button class="btn only-ovr" id="btn-only-ovr" title="Ver solo las filas que has corregido"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg> Solo corregidas</button>
+        <button class="btn show-hidden" id="btn-show-hidden" style="display:none" title="Mostrar/ocultar filas marcadas"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg> Filas ocultas (<span id="hidden-count">0</span>)</button>
+        <button class="btn clear-overrides" id="btn-clear-overrides" title="Borra todas las correcciones manuales de Movimiento/Descripción/Archivos"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg> Borrar correcciones</button>
+        <button class="btn ghost" id="btn-restore-backup" style="display:none"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg> Restaurar copia</button>
+      </div>
       <div class="sep"></div>
-      <span class="grp-lbl">Salida</span>
-      <button class="btn mail" id="btn-mail" title="Genera un correo por zona con las filas visibles">✉ Generar correos</button>
-      <button class="btn excel" id="btn-export">⬇ Exportar Excel</button>
+      <div class="grp">
+        <span class="grp-lbl">Datos</span>
+        <button class="btn ghost" id="btn-update" style="display:none" title="Sustituir por un CSV nuevo manteniendo la sesión"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg> Actualizar CSV</button>
+        <a class="btn meta" href="https://metabase.prod.monline/question/32892-control-de-cambios" target="_blank" title="Abrir consulta en Metabase"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg> Metabase</a>
+      </div>
+      <div class="grp out">
+        <span class="grp-lbl">Salida</span>
+        <button class="btn mail" id="btn-mail" title="Genera un correo por zona con las filas visibles"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg> Generar correos</button>
+        <button class="btn excel" id="btn-export"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg> Exportar Excel</button>
+      </div>
     </div>
   </div>
+
+  </div><!-- /panel-cuerpo -->
 
   <div class="stats" id="stats"></div>
   <div class="wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
@@ -837,8 +872,19 @@ function buildMovimientos(){
 
 document.getElementById('mov-ms-btn').onclick=function(e){
   e.stopPropagation();
-  document.getElementById('mov-ms-panel').classList.toggle('open');
+  var p=document.getElementById('mov-ms-panel');
+  var abierto=p.classList.toggle('open');
+  if(abierto){
+    var r=this.getBoundingClientRect();
+    var left=Math.max(12,Math.min(r.left,window.innerWidth-p.offsetWidth-12));
+    var espacio=window.innerHeight-r.bottom-12;
+    p.style.left=left+'px';
+    if(espacio<200 && r.top>espacio){ p.style.top='auto'; p.style.bottom=(window.innerHeight-r.top+4)+'px'; p.style.maxHeight=Math.min(300,r.top-16)+'px'; }
+    else { p.style.bottom='auto'; p.style.top=(r.bottom+4)+'px'; p.style.maxHeight=Math.min(300,espacio)+'px'; }
+  }
 };
+document.getElementById('panel-cuerpo').addEventListener('scroll',function(){document.getElementById('mov-ms-panel').classList.remove('open');});
+window.addEventListener('resize',function(){document.getElementById('mov-ms-panel').classList.remove('open');});
 document.addEventListener('click',function(e){
   var wrap=document.getElementById('mov-ms');
   if(wrap && !wrap.contains(e.target)){
@@ -958,10 +1004,10 @@ function render(){
   var be=document.getElementById('btn-edit-mode');
   if(be){
     be.className='btn edit-mode'+(modoEdicion?' on':'');
-    be.textContent=modoEdicion?'🔓 Edición activa':'🔒 Edición bloqueada';
+    be.innerHTML=modoEdicion?'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/></svg> Edición activa':'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Edición bloqueada';
   }
 
-  document.getElementById('btn-clear').style.display=hasActiveFilters()?'inline-block':'none';
+  document.getElementById('btn-clear').style.display=hasActiveFilters()?'inline-flex':'none';
   updateHiddenBtn();
 
   var descTerm=filterDesc.trim();
@@ -1092,7 +1138,7 @@ function updateRestoreBtn(){
   try{
     var parsed=JSON.parse(raw);
     var n=Object.keys(parsed.data||{}).length;
-    btn.style.display='inline-block';
+    btn.style.display='inline-flex';
     btn.title='Restaura '+n+' fila(s) corregidas, copia guardada el '+new Date(parsed.ts).toLocaleString('es-ES');
   }catch(ex){ btn.style.display='none'; }
 }
@@ -1200,7 +1246,7 @@ var STORAGE_NAME='cambios2026_name';
 
 function showSaved(){
   document.getElementById('hdr-saved').style.display='inline';
-  document.getElementById('btn-update').style.display='inline-block';
+  document.getElementById('btn-update').style.display='inline-flex';
 }
 
 function initFromText(text,name){
@@ -1214,7 +1260,7 @@ function initFromText(text,name){
   hiddenRowIds=new Set();
   document.getElementById('hdr-sub').textContent=allRows.length+' filas ('+YEAR_CURRENT+'-'+YEAR_NEXT+') · '+name;
   document.getElementById('upload-section').style.display='none';
-  document.getElementById('main-section').style.display='block';
+  document.getElementById('main-section').style.display='flex';
   activeAnios=[];activeMonths=[];activeTipo='ALL';activeMovimientos=[];activeRegion='';activeZona='';
   filterCentro='';filterDesc='';
   excludedCentros=[];sortColIdx=null;sortDir=1;showHidden=true;soloCorregidas=false;
