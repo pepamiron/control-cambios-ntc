@@ -22,7 +22,16 @@ header span{font-size:11px;color:#9ca3af;margin-left:auto}
 .meta-hint{font-size:11px;color:#6b7280;text-align:center;line-height:1.6}
 
 /* toolbar */
+.panel-toggle{background:#f9fafb;border-bottom:1px solid #e5e7eb;padding:3px 12px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:22}
+.pt-btn{background:none;border:0;cursor:pointer;font-size:11px;font-weight:700;color:#4b5563;text-transform:uppercase;letter-spacing:.04em;padding:3px 0;display:flex;align-items:center;gap:5px}
+.pt-btn:hover{color:#111827}
+.pt-caret{display:inline-block;transition:transform .15s;font-size:10px}
+.pt-btn[aria-expanded="false"] .pt-caret{transform:rotate(-90deg)}
+.pt-resumen{font-size:11px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .controls{background:#fff;border-bottom:1px solid #d1d5db;padding:7px 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;position:sticky;top:0;z-index:20;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.controls.acciones{border-bottom:1px solid #d1d5db;box-shadow:none;padding-top:6px;padding-bottom:6px;background:#fcfcfd}
+.grp-lbl{font-size:9.5px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-right:1px}
+body.panel-oculto #banda-filtros,body.panel-oculto #banda-acciones{display:none}
 .lbl{font-size:10px;color:#6b7280;font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
 .sep{width:1px;height:22px;background:#e5e7eb;flex-shrink:0}
 .months{display:flex;flex-wrap:wrap;gap:4px}
@@ -45,6 +54,11 @@ header span{font-size:11px;color:#9ca3af;margin-left:auto}
 .btn.show-hidden:hover{background:#ddd6fe}
 .btn.publish{background:#0e7490;color:#fff;border-color:#155e75;font-weight:600}
 .btn.publish:hover{background:#155e75}
+.btn.edit-mode{background:#fff;color:#475569;border-color:#cbd5e1;font-weight:600}
+.btn.edit-mode.on{background:#15803d;color:#fff;border-color:#166534}
+tbody td.editable.locked span.edit-text{cursor:default;}
+tbody td.editable.locked span.edit-text:hover{background:transparent;}
+tbody select.mov-edit[disabled]{background:transparent;border-color:transparent;color:inherit;appearance:none;cursor:default;}
 .btn.only-ovr{background:#fff;color:#b45309;border-color:#fcd34d;font-weight:600}
 .btn.only-ovr:hover{background:#fffbeb}
 .btn.only-ovr.on{background:#b45309;color:#fff;border-color:#92400e}
@@ -171,7 +185,14 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
 </div>
 
 <div id="main-section" style="display:none">
-  <div class="controls">
+  <div class="panel-toggle" id="panel-toggle">
+    <button type="button" class="pt-btn" id="btn-toggle-panel" aria-expanded="true">
+      <span class="pt-caret">▾</span> Filtros y acciones
+    </button>
+    <span class="pt-resumen" id="pt-resumen"></span>
+  </div>
+
+  <div class="controls" id="banda-filtros">
     <!-- Año: actual y siguiente -->
     <span class="lbl">Año</span>
     <div class="months" id="anios"></div>
@@ -239,19 +260,27 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
       <div id="excl-tags"></div>
     </div>
 
-    <!-- Acciones -->
+    <button class="btn clear-filters" id="btn-clear" style="margin-left:auto" title="Limpiar todos los filtros activos">✕ Limpiar filtros</button>
+
+  </div><!-- /banda filtros -->
+
+  <!-- Banda de acciones -->
+  <div class="controls acciones" id="banda-acciones">
     <div class="actions">
       <button class="btn show-hidden" id="btn-show-hidden" style="display:none" title="Mostrar/ocultar filas marcadas">👁 Filas ocultas (<span id="hidden-count">0</span>)</button>
       <button class="btn ghost" id="btn-restore-backup" style="display:none">↺ Restaurar copia</button>
+      <button class="btn edit-mode" id="btn-edit-mode" title="Bloquear o permitir la edición de celdas">🔒 Edición bloqueada</button>
       <button class="btn only-ovr" id="btn-only-ovr" title="Ver solo las filas que has corregido">✏ Solo corregidas</button>
       <button class="btn clear-overrides" id="btn-clear-overrides" title="Borra todas las correcciones manuales de Movimiento/Descripción/Archivos">🗑 Borrar correcciones</button>
-      <button class="btn clear-filters" id="btn-clear" title="Limpiar todos los filtros activos">✕ Limpiar filtros</button>
+      <span class="grp-lbl">Datos</span>
       <button class="btn ghost" id="btn-update" style="display:none" title="Sustituir por un CSV nuevo manteniendo la sesión">↺ Actualizar CSV</button>
       <button class="btn publish" id="btn-publish-csv" style="display:none" title="Sube el CSV actual al bin compartido para que lo vea todo el que abra el enlace">☁ Publicar CSV</button>
       <a class="btn meta" href="https://metabase.prod.monline/question/32892-control-de-cambios" target="_blank" title="Abrir consulta en Metabase">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         Metabase
       </a>
+      <div class="sep"></div>
+      <span class="grp-lbl">Salida</span>
       <button class="btn excel" id="btn-export">⬇ Exportar Excel</button>
     </div>
   </div>
@@ -502,7 +531,7 @@ var YEAR_NEXT    = YEAR_CURRENT + 1;
 var allRows=[], activeMonths=[], activeTipo='ALL', activeMovimientos=[],
     activeZona='', activeRegion='', filterCentro='', filterDesc='',
     excludedCentros=[], activeAnios=[], sortColIdx=null, sortDir=1,
-    hiddenRowIds=new Set(), showHidden=true, overrides={}, soloCorregidas=false;
+    hiddenRowIds=new Set(), showHidden=true, overrides={}, soloCorregidas=false, modoEdicion=false;
 
 // ID único por fila para poder ocultarlas individualmente (solo de sesión)
 function assignRowIds(rows){
@@ -519,6 +548,27 @@ function rowKey(row){
 function normTexto(s){
   return String(s==null?'':s).replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
 }
+// La versión anterior guardaba una corrección cada vez que se pinchaba en una
+// celda, aunque no se cambiara nada. Esas quedaron en JSONBin. Al cargar se
+// retiran las que tienen exactamente el mismo valor que el CSV: no son cambios.
+function limpiarCorreccionesVacias(){
+  if(!allRows.length || !Object.keys(overrides).length) return 0;
+  var porClave={};
+  allRows.forEach(function(r){ porClave[rowKey(r)]=r; });
+  var n=0;
+  Object.keys(overrides).forEach(function(k){
+    var row=porClave[k];
+    if(!row) return;                       // fila de otro CSV: no se toca
+    var o=overrides[k];
+    Object.keys(o).forEach(function(campo){
+      if(normTexto(o[campo])===normTexto(row[campo])){ delete o[campo]; n++; }
+    });
+    if(Object.keys(o).length===0) delete overrides[k];
+  });
+  if(n>0) scheduleSaveOverrides();
+  return n;
+}
+
 function getOverride(row,field){
   var k=rowKey(row), o=overrides[k];
   return (o && o[field]!=null) ? o[field] : null;
@@ -877,6 +927,12 @@ function render(){
   if(so) so.onclick=toggleSoloCorregidas;
   var bo=document.getElementById('btn-only-ovr');
   if(bo){ bo.className='btn only-ovr'+(soloCorregidas?' on':''); }
+  actualizarResumenPanel();
+  var be=document.getElementById('btn-edit-mode');
+  if(be){
+    be.className='btn edit-mode'+(modoEdicion?' on':'');
+    be.textContent=modoEdicion?'🔓 Edición activa':'🔒 Edición bloqueada';
+  }
 
   document.getElementById('btn-clear').style.display=hasActiveFilters()?'inline-block':'none';
   updateHiddenBtn();
@@ -911,12 +967,12 @@ function render(){
           var esc=o.replace(/&/g,'&amp;').replace(/</g,'&lt;');
           return '<option value="'+esc+'" '+(o===v?'selected':'')+'>'+esc+'</option>';
         }).join('');
-        return '<td class="mov-cell'+(edited?' is-edited':'')+'" title="'+v.replace(/"/g,'&quot;')+'"><select class="mov-edit" data-rid="'+row.__id+'" data-field="movimiento">'+optsHtml+'</select>'+(edited?'<span class="edited-flag" title="Corregido manualmente">✎</span><button class="revert-btn" data-rid="'+row.__id+'" data-field="movimiento" title="Deshacer, volver al valor de Metabase">↺</button>':'')+'</td>';
+        return '<td class="mov-cell'+(edited?' is-edited':'')+'" title="'+v.replace(/"/g,'&quot;')+'"><select class="mov-edit"'+(modoEdicion?'':' disabled')+' data-rid="'+row.__id+'" data-field="movimiento">'+optsHtml+'</select>'+(edited?'<span class="edited-flag" title="Corregido manualmente">✎</span><button class="revert-btn" data-rid="'+row.__id+'" data-field="movimiento" title="Deshacer, volver al valor de Metabase">↺</button>':'')+'</td>';
       }
       if(col.editable==='text'){
         var edited2=isOverridden(row,col.src);
         var esc2=v.replace(/&/g,'&amp;').replace(/</g,'&lt;');
-        return '<td class="editable'+(edited2?' is-edited':'')+'"><span class="edit-text" contenteditable="true" data-rid="'+row.__id+'" data-field="'+col.src+'">'+esc2+'</span>'+(edited2?'<span class="edited-flag" title="Corregido manualmente">✎</span><button class="revert-btn" data-rid="'+row.__id+'" data-field="'+col.src+'" title="Deshacer, volver al valor de Metabase">↺</button>':'')+'</td>';
+        return '<td class="editable'+(edited2?' is-edited':'')+(modoEdicion?'':' locked')+'"><span class="edit-text" contenteditable="'+(modoEdicion?'true':'false')+'" data-rid="'+row.__id+'" data-field="'+col.src+'">'+esc2+'</span>'+(edited2?'<span class="edited-flag" title="Corregido manualmente">✎</span><button class="revert-btn" data-rid="'+row.__id+'" data-field="'+col.src+'" title="Deshacer, volver al valor de Metabase">↺</button>':'')+'</td>';
       }
       var cellHtml;
       if(col.src==='descripcion_movimiento' && descTerm){
@@ -1039,6 +1095,47 @@ function toggleSoloCorregidas(){
   render();
 }
 document.getElementById('btn-only-ovr').onclick=toggleSoloCorregidas;
+
+// Panel plegable: al ocultarlo se muestra un resumen de lo que hay activo,
+// para no perder de vista que estás viendo una tabla filtrada.
+function actualizarResumenPanel(){
+  var el=document.getElementById('pt-resumen');
+  if(!el) return;
+  var oculto=document.body.classList.contains('panel-oculto');
+  if(!oculto){ el.textContent=''; return; }
+  var p=[];
+  if(activeAnios.length) p.push('Año: '+activeAnios.join(', '));
+  if(activeMonths.length) p.push(activeMonths.length+' mes(es)');
+  if(activeTipo!=='ALL') p.push(activeTipo);
+  if(activeMovimientos.length) p.push(activeMovimientos.length+' movimiento(s)');
+  if(activeRegion) p.push(activeRegion);
+  if(activeZona) p.push(activeZona);
+  if(filterCentro.trim()) p.push('Centro: '+filterCentro.trim());
+  if(filterDesc.trim()) p.push('Desc: '+filterDesc.trim());
+  if(excludedCentros.length) p.push(excludedCentros.length+' excluido(s)');
+  if(soloCorregidas) p.push('solo corregidas');
+  if(modoEdicion) p.push('edición activa');
+  el.textContent = p.length ? '· '+p.join(' · ') : '· sin filtros';
+}
+
+document.getElementById('btn-toggle-panel').onclick=function(){
+  var oculto=document.body.classList.toggle('panel-oculto');
+  this.setAttribute('aria-expanded', oculto?'false':'true');
+  try{ localStorage.setItem('cc_panel_oculto', oculto?'1':'0'); }catch(e){}
+  actualizarResumenPanel();
+};
+
+try{
+  if(localStorage.getItem('cc_panel_oculto')==='1'){
+    document.body.classList.add('panel-oculto');
+    document.getElementById('btn-toggle-panel').setAttribute('aria-expanded','false');
+  }
+}catch(e){}
+
+document.getElementById('btn-edit-mode').onclick=function(){
+  modoEdicion=!modoEdicion;
+  render();
+};
 
 document.getElementById('btn-clear-overrides').onclick=function(){
   var n=Object.keys(overrides).length;
