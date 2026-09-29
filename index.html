@@ -513,6 +513,12 @@ function assignRowIds(rows){
 function rowKey(row){
   return (row['code']||row['mercadona_code']||'') + '|' + (row['fecha_servicio']||'');
 }
+// El navegador colapsa saltos de línea y espacios repetidos al mostrar el HTML,
+// así que innerText nunca coincide literalmente con un valor multilínea del CSV.
+// Para saber si el usuario ha cambiado algo hay que comparar normalizando igual.
+function normTexto(s){
+  return String(s==null?'':s).replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
+}
 function getOverride(row,field){
   var k=rowKey(row), o=overrides[k];
   return (o && o[field]!=null) ? o[field] : null;
@@ -959,17 +965,19 @@ function render(){
       var row=rowsById[+span.dataset.rid];
       if(!row) return;
       var campo=span.dataset.field;
-      var nuevo=span.innerText.replace(/\u00a0/g,' ').trim();   // el contenteditable mete &nbsp;
-      var original=(row[campo]||'').trim();                      // valor de Metabase
+      var nuevo=normTexto(span.innerText);
+      var original=normTexto(row[campo]);     // valor de Metabase
       var previo=getOverride(row,campo);
 
       if(nuevo===original){
-        // Ha vuelto al valor original (o no ha tocado nada): no es una corrección.
-        // Si había una corrección previa, se retira y la fila deja de estar marcada.
+        // No ha tocado nada, o ha vuelto al valor original: no es una corrección.
+        // Si había una previa se retira, y se repinta para recuperar el texto
+        // original con sus saltos de línea.
         if(previo!=null){ clearOverride(row,campo); render(); }
+        else if(span.innerText!==(row[campo]||'')) render();
         return;
       }
-      if(previo!=null && nuevo===String(previo).trim()) return;   // sin cambios respecto a lo ya guardado
+      if(previo!=null && nuevo===normTexto(previo)) return;   // igual a lo ya guardado
       setOverride(row,campo,nuevo);
       render();
     });
