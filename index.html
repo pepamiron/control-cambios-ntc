@@ -29,7 +29,7 @@ header span{font-size:11px;color:#9ca3af;margin-left:auto}
 .pt-btn[aria-expanded="false"] .pt-caret{transform:rotate(-90deg)}
 .pt-resumen{font-size:11px;color:#6b7280;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .controls{background:#fff;border-bottom:1px solid #d1d5db;padding:7px 12px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;position:sticky;top:0;z-index:20;box-shadow:0 1px 3px rgba(0,0,0,.08)}
-.controls.acciones{border-bottom:1px solid #d1d5db;box-shadow:none;padding-top:6px;padding-bottom:6px;background:#fcfcfd}
+.controls.acciones{box-shadow:none;padding-top:6px;padding-bottom:6px;background:#fcfcfd}
 .grp-lbl{font-size:9.5px;color:#9ca3af;text-transform:uppercase;letter-spacing:.05em;font-weight:700;margin-right:1px}
 body.panel-oculto #banda-filtros,body.panel-oculto #banda-acciones{display:none}
 .lbl{font-size:10px;color:#6b7280;font-weight:700;white-space:nowrap;text-transform:uppercase;letter-spacing:.04em}
@@ -52,8 +52,6 @@ body.panel-oculto #banda-filtros,body.panel-oculto #banda-acciones{display:none}
 .btn.clear-filters:hover{background:#fde68a}
 .btn.show-hidden{background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;font-weight:600}
 .btn.show-hidden:hover{background:#ddd6fe}
-.btn.publish{background:#0e7490;color:#fff;border-color:#155e75;font-weight:600}
-.btn.publish:hover{background:#155e75}
 .btn.edit-mode{background:#fff;color:#475569;border-color:#cbd5e1;font-weight:600}
 .btn.edit-mode.on{background:#15803d;color:#fff;border-color:#166534}
 tbody td.editable.locked span.edit-text{cursor:default;}
@@ -156,6 +154,35 @@ td.col-hide{text-align:center;padding:4px 6px;}
 }
 .hide-btn:hover{border-color:#a78bfa;background:#ede9fe;color:#7c3aed;}
 tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
+
+/* ── Generador de correos ── */
+.btn.mail{background:#14532d;color:#fff;border-color:#0f3d21;font-weight:600}
+.btn.mail:hover{background:#0f3d21}
+.mail-overlay{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto}
+.mail-box{background:#fff;border-radius:8px;width:100%;max-width:1100px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.mail-head{display:flex;align-items:center;gap:10px;padding:10px 16px;background:#14532d;color:#fff;border-radius:8px 8px 0 0}
+.mail-head h2{font-size:14px;font-weight:600}
+.mail-head button{margin-left:auto;background:none;border:none;color:#fff;font-size:16px;cursor:pointer}
+.mail-cfg{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid #e5e7eb}
+.mail-cfg label.btn{display:inline-flex;align-items:center;gap:4px}
+.mail-cfg input[type=file]{display:none}
+#mail-pdf-status{font-size:11px;color:#6b7280}
+.mail-note{padding:8px 16px;font-size:11px;color:#4b5563;background:#f9fafb;border-bottom:1px solid #e5e7eb;line-height:1.6}
+.mail-note.warn{background:#fffbeb;color:#92400e}
+#mail-list{padding:8px 16px 16px;display:flex;flex-direction:column;gap:8px}
+.mail-zone{border:1px solid #d1d5db;border-radius:6px;padding:10px 12px}
+.mail-zone.has-warn{border-color:#fcd34d;background:#fffdf5}
+.mz-top{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.mz-top strong{font-size:13px}
+.mz-top input{font-size:12px;padding:3px 6px;border:1px solid #d1d5db;border-radius:3px;width:200px}
+.mz-top .mz-actions{margin-left:auto;display:flex;gap:6px}
+.mz-subj{font-size:12px;margin-top:6px;color:#111827}
+.mz-meta{font-size:11px;color:#6b7280;margin-top:3px;line-height:1.5;word-break:break-word}
+.mz-warn{font-size:11px;color:#92400e;margin-top:4px}
+.mz-warn div::before{content:"⚠ "}
+#mail-preview{border-top:1px solid #e5e7eb;padding:10px 16px 16px}
+#mail-preview iframe{width:100%;height:520px;border:1px solid #d1d5db;border-radius:4px;background:#fff}
+.mail-toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#14532d;color:#fff;padding:8px 16px;border-radius:6px;font-size:12px;z-index:200;box-shadow:0 4px 12px rgba(0,0,0,.25)}
 </style>
 </head>
 <body>
@@ -260,8 +287,8 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
       <div id="excl-tags"></div>
     </div>
 
-    <button class="btn clear-filters" id="btn-clear" style="margin-left:auto" title="Limpiar todos los filtros activos">✕ Limpiar filtros</button>
-
+    <!-- Acciones -->
+    <button class="btn clear-filters" style="margin-left:auto" id="btn-clear" title="Limpiar todos los filtros activos">✕ Limpiar filtros</button>
   </div><!-- /banda filtros -->
 
   <!-- Banda de acciones -->
@@ -274,19 +301,39 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
       <button class="btn clear-overrides" id="btn-clear-overrides" title="Borra todas las correcciones manuales de Movimiento/Descripción/Archivos">🗑 Borrar correcciones</button>
       <span class="grp-lbl">Datos</span>
       <button class="btn ghost" id="btn-update" style="display:none" title="Sustituir por un CSV nuevo manteniendo la sesión">↺ Actualizar CSV</button>
-      <button class="btn publish" id="btn-publish-csv" style="display:none" title="Sube el CSV actual al bin compartido para que lo vea todo el que abra el enlace">☁ Publicar CSV</button>
       <a class="btn meta" href="https://metabase.prod.monline/question/32892-control-de-cambios" target="_blank" title="Abrir consulta en Metabase">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
         Metabase
       </a>
       <div class="sep"></div>
       <span class="grp-lbl">Salida</span>
+      <button class="btn mail" id="btn-mail" title="Genera un correo por zona con las filas visibles">✉ Generar correos</button>
       <button class="btn excel" id="btn-export">⬇ Exportar Excel</button>
     </div>
   </div>
 
   <div class="stats" id="stats"></div>
   <div class="wrap"><table><thead id="thead"></thead><tbody id="tbody"></tbody></table></div>
+</div>
+
+<div id="mail-modal" class="mail-overlay" style="display:none">
+  <div class="mail-box">
+    <div class="mail-head"><h2>Generar correos por zona</h2><button id="mail-close" title="Cerrar">✕</button></div>
+    <div class="mail-cfg">
+      <button class="btn" id="mail-pdf-reuse" style="display:none" title="Vuelve a leer la carpeta que elegiste la última vez">📂 Usar carpeta guardada</button>
+      <button class="btn" id="mail-pdf-pick" title="Elige la carpeta de los PDF; el navegador la recordará">📁 Elegir carpeta de PDFs</button>
+      <label class="btn" id="mail-pdf-dir-lbl" style="display:none" title="Selecciona la carpeta donde están los PDF de los mapas">📁 Carpeta de PDFs<input type="file" id="mail-pdf-dir" webkitdirectory multiple></label>
+      <label class="btn" title="O selecciona los PDF sueltos">📄 PDFs sueltos<input type="file" id="mail-pdf-files" accept=".pdf" multiple></label>
+      <span id="mail-pdf-status">Sin PDFs seleccionados</span>
+      <button class="btn excel" id="mail-all-eml" style="margin-left:auto">⬇ Descargar todos (.eml)</button>
+    </div>
+    <div class="mail-note" id="mail-note"></div>
+    <div id="mail-list"></div>
+    <div id="mail-preview" style="display:none">
+      <div style="display:flex;align-items:center;margin-bottom:6px"><strong id="mail-preview-title" style="font-size:12px"></strong><button class="btn" id="mail-preview-close" style="margin-left:auto">Cerrar vista previa</button></div>
+      <iframe id="mail-preview-frame" title="Vista previa del correo"></iframe>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
@@ -510,8 +557,8 @@ var MOVIMIENTO_OPTIONS = [
 // en el mismo año — esa la calcula solo la query. Revisa siempre tras aceptar
 // la sugerencia).
 var ARCHIVO_POR_MOVIMIENTO = {
-  'AMPLIACIÓN MODELO': 'GUÍA CAMBIO DE MODELO (Ruta: Biblioteca / Métodos / NTC+NSD / Mantenimiento / 06 Guía cambio de escenario NTC-NSD)',
-  'AMPLIACIÓN MODELO + REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO\nGUÍA CAMBIO DE MODELO (Ruta: Biblioteca / Métodos / NTC+NSD / Mantenimiento / 06 Guía cambio de escenario NTC-NSD)',
+  'AMPLIACIÓN MODELO': 'GUÍA CAMBIO DE MODELO (Ruta: Biblioteca / Métodos / NTC+NSD / Mantenimiento / 02 Guía cambio de escenario NTC-NSD)',
+  'AMPLIACIÓN MODELO + REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO\nGUÍA CAMBIO DE MODELO (Ruta: Biblioteca / Métodos / NTC+NSD / Mantenimiento / 02 Guía cambio de escenario NTC-NSD)',
   'NUEVA IMPLANTACIÓN': 'MAPA ÁREA DE SERVICIO\nPLANIFICACIÓN ANUAL',
   'APERTURA COLMENA': 'MAPA ÁREA DE SERVICIO',
   'APERTURA TRAS REFORMA': 'MAPA ÁREA DE SERVICIO',
@@ -542,33 +589,13 @@ function assignRowIds(rows){
 function rowKey(row){
   return (row['code']||row['mercadona_code']||'') + '|' + (row['fecha_servicio']||'');
 }
-// El navegador colapsa saltos de línea y espacios repetidos al mostrar el HTML,
-// así que innerText nunca coincide literalmente con un valor multilínea del CSV.
-// Para saber si el usuario ha cambiado algo hay que comparar normalizando igual.
+// El navegador colapsa saltos de línea y espacios repetidos al pintar el HTML,
+// así que innerText nunca coincide literalmente con un valor multilínea del CSV
+// (el campo "archivo" lo es en muchas filas). Para saber si el usuario ha
+// cambiado algo hay que comparar normalizando igual que hace el navegador.
 function normTexto(s){
   return String(s==null?'':s).replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
 }
-// La versión anterior guardaba una corrección cada vez que se pinchaba en una
-// celda, aunque no se cambiara nada. Esas quedaron en JSONBin. Al cargar se
-// retiran las que tienen exactamente el mismo valor que el CSV: no son cambios.
-function limpiarCorreccionesVacias(){
-  if(!allRows.length || !Object.keys(overrides).length) return 0;
-  var porClave={};
-  allRows.forEach(function(r){ porClave[rowKey(r)]=r; });
-  var n=0;
-  Object.keys(overrides).forEach(function(k){
-    var row=porClave[k];
-    if(!row) return;                       // fila de otro CSV: no se toca
-    var o=overrides[k];
-    Object.keys(o).forEach(function(campo){
-      if(normTexto(o[campo])===normTexto(row[campo])){ delete o[campo]; n++; }
-    });
-    if(Object.keys(o).length===0) delete overrides[k];
-  });
-  if(n>0) scheduleSaveOverrides();
-  return n;
-}
-
 function getOverride(row,field){
   var k=rowKey(row), o=overrides[k];
   return (o && o[field]!=null) ? o[field] : null;
@@ -1002,7 +1029,6 @@ function render(){
       var row=rowsById[+sel.dataset.rid];
       if(!row) return;
       if(sel.value===(row['movimiento']||'')){
-        // Ha vuelto al valor de Metabase: deja de ser una corrección
         clearOverride(row,'movimiento');
       }else{
         setOverride(row,'movimiento',sel.value);
@@ -1022,18 +1048,16 @@ function render(){
       if(!row) return;
       var campo=span.dataset.field;
       var nuevo=normTexto(span.innerText);
-      var original=normTexto(row[campo]);     // valor de Metabase
+      var original=normTexto(row[campo]);
       var previo=getOverride(row,campo);
 
       if(nuevo===original){
-        // No ha tocado nada, o ha vuelto al valor original: no es una corrección.
-        // Si había una previa se retira, y se repinta para recuperar el texto
-        // original con sus saltos de línea.
+        // No ha tocado nada, o ha vuelto al valor de Metabase: no es corrección
         if(previo!=null){ clearOverride(row,campo); render(); }
         else if(span.innerText!==(row[campo]||'')) render();
         return;
       }
-      if(previo!=null && nuevo===normTexto(previo)) return;   // igual a lo ya guardado
+      if(previo!=null && nuevo===normTexto(previo)) return;
       setOverride(row,campo,nuevo);
       render();
     });
@@ -1096,13 +1120,12 @@ function toggleSoloCorregidas(){
 }
 document.getElementById('btn-only-ovr').onclick=toggleSoloCorregidas;
 
-// Panel plegable: al ocultarlo se muestra un resumen de lo que hay activo,
-// para no perder de vista que estás viendo una tabla filtrada.
+// Al plegar el panel se muestra un resumen de lo activo, para no perder de
+// vista que estás viendo una tabla filtrada.
 function actualizarResumenPanel(){
   var el=document.getElementById('pt-resumen');
   if(!el) return;
-  var oculto=document.body.classList.contains('panel-oculto');
-  if(!oculto){ el.textContent=''; return; }
+  if(!document.body.classList.contains('panel-oculto')){ el.textContent=''; return; }
   var p=[];
   if(activeAnios.length) p.push('Año: '+activeAnios.join(', '));
   if(activeMonths.length) p.push(activeMonths.length+' mes(es)');
@@ -1124,7 +1147,6 @@ document.getElementById('btn-toggle-panel').onclick=function(){
   try{ localStorage.setItem('cc_panel_oculto', oculto?'1':'0'); }catch(e){}
   actualizarResumenPanel();
 };
-
 try{
   if(localStorage.getItem('cc_panel_oculto')==='1'){
     document.body.classList.add('panel-oculto');
@@ -1179,7 +1201,6 @@ var STORAGE_NAME='cambios2026_name';
 function showSaved(){
   document.getElementById('hdr-saved').style.display='inline';
   document.getElementById('btn-update').style.display='inline-block';
-  if(csvBinConfigured()) document.getElementById('btn-publish-csv').style.display='inline-block';
 }
 
 function initFromText(text,name){
@@ -1220,15 +1241,8 @@ function loadFile(file){
     currentCsvText=text; currentCsvName=file.name;
     try{localStorage.setItem(STORAGE_KEY,text);localStorage.setItem(STORAGE_NAME,file.name);}catch(ex){}
     initFromText(text,file.name);
-    // Publicar para que lo vean los demás: se pregunta, no se hace a la callada,
-    // porque sustituye el CSV que está viendo todo el equipo.
-    if(csvBinConfigured()){
-      if(confirm('CSV cargado ('+allRows.length+' filas).\n\n¿Publicarlo en el bin compartido para que lo vea todo el que abra el enlace?\n\nSustituirá el CSV compartido actual.')){
-        await publishCsv(text, file.name);
-      }else{
-        setCsvStatus('sin publicar (solo en este navegador)', '#fde68a');
-      }
-    }
+    // Se publica solo: el CSV que subes es el que ve todo el mundo.
+    if(csvBinConfigured()) await publishCsv(text, file.name);
   };
   reader.readAsText(file,'UTF-8');
 }
@@ -1295,12 +1309,6 @@ fiUpdate.type='file';fiUpdate.accept='.csv';
 fiUpdate.onchange=function(e){loadFile(e.target.files[0]);fiUpdate.value='';};
 document.getElementById('btn-update').onclick=function(){fiUpdate.click();};
 
-document.getElementById('btn-publish-csv').onclick=async function(){
-  if(!currentCsvText){ alert('No hay CSV cargado que publicar.'); return; }
-  if(!confirm('Se va a publicar el CSV actual ('+allRows.length+' filas) en el bin compartido.\n\nSustituirá el CSV que está viendo el resto del equipo. ¿Continuar?')) return;
-  var ok=await publishCsv(currentCsvText, currentCsvName||'CSV');
-  if(ok) alert('CSV publicado. Cualquiera que abra el enlace verá estos datos.');
-};
 
 document.getElementById('btn-export').onclick=function(){
   var rows=filtered().filter(function(r){return !hiddenRowIds.has(r.__id);});
@@ -1337,6 +1345,417 @@ document.getElementById('btn-export').onclick=function(){
   if(activeTipo!=='ALL') suffix+='_'+activeTipo;
   if(activeRegion) suffix+='_'+activeRegion;
   XLSX.writeFile(wb,'cambios_servicio_online'+suffix+'.xlsx');
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// GENERADOR DE CORREOS POR ZONA (replica la macro EnviarCorreosNTC)
+// Usa las filas visibles con los filtros actuales, sin las marcadas ocultas.
+// ══════════════════════════════════════════════════════════════════════════
+var MAIL_CC_FIJOS  = ['vepalaci@mercadona.es','asalvca@mercadona.es','aherrva@mercadona.es','agimenru@mercadona.es','divprofi@mercadona.es','marcmarg@mercadona.es'];
+var MAIL_CCO_FIJOS = ['nopinero@mercadona.es','procesosntc@mercadona.es','pmiron@mercadona.es'];
+var MAIL_FIRMA     = 'Inma Serrano';
+var MAIL_CC_TEXTO  = 'Verónica Palacios, Alberto Salvador, Antonio Herrero, Marc Martínez, Alfredo Gimeno';
+var MAIL_NOMBRES_KEY = 'cambios_mail_coord_zona';
+var MAIL_COLS = COLS.slice(2); // CENTRO … ARCHIVOS (sin AÑO ni MES)
+
+var mailPdfFiles = [], mailNombresZona = {}, mailInfos = [];
+
+// Maestra tiendas (Google Sheet "Oferta anual", pestaña publicada como CSV).
+// Estructura: fila 1 "Consulta eis", fila 2 cabecera; A=Centro, H=Zona Coordinador (nº), I=nombre del coordinador.
+// Pega aquí la URL PUBLICADA (…/d/e/2PACX-…/pub?gid=1033958494&single=true&output=csv), no la de edición.
+var MAIL_MAESTRA_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQpfV_priRpFanTSYLZR1_OHxAVl9lzrd01WluyvCuXmRRF8_KsBB9pIdPyYsb_Hg6FVQXMaHuiGEKe/pub?gid=1033958494&single=true&output=csv';
+// Respaldo si la publicada falla (solo funciona si la hoja está compartida con "cualquiera con el enlace")
+var MAIL_MAESTRA_URL_RESPALDO = 'https://docs.google.com/spreadsheets/d/16-h2Cs0L7eOu5WBPS02-dVW42-O_6YQVBNMa9_0rh5A/gviz/tq?tqx=out:csv&gid=1033958494&headers=0';
+var mailMaestra = null, mailMaestraEstado = '', mailMaestraError = '';
+
+async function mailCargarMaestra(){
+  if(mailMaestra) return;
+  if(!MAIL_MAESTRA_URL){ mailMaestraEstado = 'sin configurar'; return; }
+  try{
+    var texto = null;
+    var urls = [MAIL_MAESTRA_URL, MAIL_MAESTRA_URL_RESPALDO];
+    var fallos = [];
+    for(var u=0; u<urls.length && texto===null; u++){
+      try{
+        var res = await fetch(urls[u], {cache:'no-store'});
+        if(res.ok) texto = await res.text(); else fallos.push((u?'respaldo':'publicada')+': HTTP '+res.status);
+      }catch(e){ fallos.push((u?'respaldo':'publicada')+': bloqueada por el navegador o la red ('+(e && e.message || e)+')'); }
+    }
+    if(texto === null) throw new Error(fallos.join(' · '));
+    if(/^\s*</.test(texto)) throw new Error('Google ha devuelto una página web en vez del CSV (suele ser una pantalla de inicio de sesión)');
+    var rows = parseCSV(texto);
+    var porCentro = {}, cuenta = {};
+    // Se ignoran las filas de cabecera: solo cuentan las que tienen un código de centro numérico
+    for(var j=0; j<rows.length; j++){
+      var r = rows[j], centro = String(r[0]||'').trim(), zona = parseInt(r[7],10);
+      if(!/^\d+$/.test(centro)) continue;
+      var nombre = String(r[8]||'').trim().replace(/\s*\([^)]*\)\s*/g,' ').trim(); // quita "(PROVIS)" y similares
+      if(!centro || isNaN(zona)) continue;
+      porCentro[centro] = {zona:zona, nombre:nombre};
+      if(!nombre || /^SIN ZONA$/i.test(nombre)) continue;
+      cuenta[zona] = cuenta[zona] || {}; cuenta[zona][nombre] = (cuenta[zona][nombre]||0) + 1;
+    }
+    var porZona = {};
+    Object.keys(cuenta).forEach(function(z){
+      porZona[z] = Object.keys(cuenta[z]).sort(function(a,b){ return cuenta[z][b]-cuenta[z][a]; })[0];
+    });
+    if(!Object.keys(porCentro).length) throw new Error('la hoja no devuelve centros (¿URL o permisos?)');
+    mailMaestra = {porCentro:porCentro, porZona:porZona};
+    mailMaestraEstado = 'ok';
+  }catch(e){
+    console.error('Maestra tiendas', e);
+    mailMaestraEstado = 'error'; mailMaestraError = (e && e.message) || String(e);
+  }
+}
+
+function mailLoadNombres(){ try{ mailNombresZona = JSON.parse(localStorage.getItem(MAIL_NOMBRES_KEY)||'{}') || {}; }catch(e){ mailNombresZona = {}; } }
+function mailSaveNombres(){ try{ localStorage.setItem(MAIL_NOMBRES_KEY, JSON.stringify(mailNombresZona)); }catch(e){} }
+function mailEsc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function mailNorm(s){ return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase(); }
+function mailCapitalizar(s){ return String(s||'').trim().toLowerCase().replace(/(^|\s)(\S)/g,function(m,a,b){ return a+b.toUpperCase(); }); }
+function mailZonaNum(z){ var m = String(z||'').match(/(\d+)/); return m ? parseInt(m[1],10) : null; }
+function mailToast(msg){
+  var t = document.createElement('div'); t.className = 'mail-toast'; t.textContent = msg;
+  document.body.appendChild(t); setTimeout(function(){ t.remove(); }, 3500);
+}
+
+// PDF del centro: empieza por el código (o C-/C_ + código) y NO sigue otro dígito o letra.
+// Así el centro 123 no se lleva el PDF del 1234.
+function mailPdfsDeCodigo(code){
+  code = String(code||'').trim(); if(!code) return [];
+  var esc = code.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  var re = new RegExp('^(c[-_])?' + esc + '(?![0-9a-z])', 'i');
+  return mailPdfFiles.filter(function(f){ return re.test(f.name); });
+}
+
+function mailFechaYYMMDD(){
+  var d = new Date();
+  return String(d.getFullYear()).slice(2) + ('0'+(d.getMonth()+1)).slice(-2) + ('0'+d.getDate()).slice(-2);
+}
+
+function mailBuildInfos(){
+  var rows = filtered().filter(function(r){ return !hiddenRowIds.has(r.__id); });
+  var grupos = {}, orden = [], sinZona = 0;
+  rows.forEach(function(r){
+    var n = mailZonaNum(r['zona']);
+    if(n === null){ sinZona++; return; }
+    if(!grupos[n]){ grupos[n] = []; orden.push(n); }
+    grupos[n].push(r);
+  });
+  orden.sort(function(a,b){ return a-b; });
+  var hayPdfs = mailPdfFiles.length > 0;
+  var saludo = new Date().getHours() < 14 ? 'Buenos días' : 'Buenas tardes';
+  var fecha = mailFechaYYMMDD();
+
+  mailInfos = orden.map(function(n){
+    var filas = grupos[n], nn = ('0'+n).slice(-2);
+    var cps = [], vistos = {}, pdfs = [], pdfVistos = {}, avisos = [], meses = [], anios = [];
+    filas.forEach(function(r){
+      var mc = (r['mercadona_code']||'').trim(), centro = getCentroVal(r);
+      if(/^\d+$/.test(mc)){
+        if(!vistos[mc]){ vistos[mc] = 1; cps.push('cp'+mc+'@mercadona.es'); }
+      } else {
+        avisos.push('El centro '+(centro||'(vacío)')+' no tiene código numérico: no se añade coordinador de planta en CC');
+      }
+      // Solo se adjunta el mapa si la columna ARCHIVOS lo pide: así no se cuelan
+      // mapas antiguos de centros que este mes no lo necesitan.
+      var arch = mailNorm(getVal(r, COLS[10]));
+      if(arch.indexOf('MAPA AREA DE SERVICIO') !== -1){
+        var encontrados = [];
+        [mc, centro].filter(function(c,i,a){ return c && a.indexOf(c)===i; }).forEach(function(c){
+          mailPdfsDeCodigo(c).forEach(function(f){
+            encontrados.push(f);
+            var k = f.name.toLowerCase();
+            if(!pdfVistos[k]){ pdfVistos[k] = 1; pdfs.push(f); }
+          });
+        });
+        if(hayPdfs && !encontrados.length){
+          avisos.push('Archivos indica MAPA ÁREA DE SERVICIO para el centro '+centro+' pero no hay PDF suyo en la carpeta');
+        }
+        if(encontrados.length > 1){
+          avisos.push('El centro '+centro+' tiene '+encontrados.length+' PDF en la carpeta ('+encontrados.map(function(f){return f.name;}).join(', ')+'); se adjuntan todos, revisa que no haya versiones antiguas');
+        }
+      }
+      var m = (r['mes']||'').toUpperCase(); if(m && meses.indexOf(m)===-1) meses.push(m);
+      var a = getAnioVal(r); if(a && anios.indexOf(a)===-1) anios.push(a);
+    });
+    meses.sort(function(a,b){ return MONTH_ORDER.indexOf(a)-MONTH_ORDER.indexOf(b); });
+    anios.sort();
+    if(meses.length > 1) avisos.push('Esta zona mezcla meses ('+meses.join(', ')+'). Filtra por mes si deben ir en correos separados');
+    if(mailMaestra){
+      Object.keys(vistos).forEach(function(c){
+        var m = mailMaestra.porCentro[c];
+        if(m && m.zona !== n) avisos.push('La Maestra tiendas pone el centro '+c+' en la zona '+m.zona+', no en la '+n);
+      });
+    }
+    var nombreMaestra = mailMaestra ? (mailMaestra.porZona[n] || '') : '';
+    var nombre = mailNombresZona[n] || nombreMaestra;
+    if(!nombre) avisos.push('Falta el nombre del coordinador de zona');
+
+    var asunto = fecha + ' Cambios ' + (meses.join(' Y ')||'[MES]') + ' ' + (anios.join('-')||'[AÑO]') + ' NTC-NSD Zona ' + n;
+    var cc = cps.concat(MAIL_CC_FIJOS);
+    var info = { num:n, to:'jz'+nn+'@mercadona.es', cc:cc, asunto:asunto, filas:filas, pdfs:pdfs, avisos:avisos, nombre:nombre, nombreManual:!!mailNombresZona[n], nCentros:Object.keys(vistos).length };
+    info.html = mailCuerpoHtml(info, saludo);
+    info.texto = mailCuerpoTexto(info, saludo);
+    return info;
+  });
+  return { sinZona:sinZona, total:rows.length };
+}
+
+function mailCuerpoHtml(info, saludo){
+  var P = 'margin:0 0 12px 0;font-size:21px;';
+  var hSty = 'background:#14532d;color:#fff;padding:4px 6px;text-align:left;font-size:13px;font-weight:bold;border-right:1px solid #166534;font-family:Arial,sans-serif;';
+  var tabla = '<table style="border-collapse:collapse;width:100%;font-family:Arial,sans-serif;font-size:13px;"><thead><tr>' +
+    MAIL_COLS.map(function(c){ return '<th style="'+hSty+'">'+mailEsc(c.label)+'</th>'; }).join('') + '</tr></thead><tbody>';
+  info.filas.forEach(function(r,i){
+    var tdSty = 'padding:3px 6px;border-bottom:1px solid #e5e7eb;border-right:1px solid #f3f4f6;color:#111827;background:'+(i%2===0?'#ffffff':'#f9fafb')+';font-family:Arial,sans-serif;font-size:13px;';
+    tabla += '<tr>' + MAIL_COLS.map(function(c){ return '<td style="'+tdSty+'">'+mailEsc(getVal(r,c)).replace(/\n/g,'<br>')+'</td>'; }).join('') + '</tr>';
+  });
+  tabla += '</tbody></table>';
+  var coordTxt = info.nCentros === 1 ? 'Coord. planta implicado' : 'Coord. planta implicados';
+  var para = info.nombre ? mailCapitalizar(info.nombre) : ('Coord. Zona ' + info.num);
+  return '<html><body style="font-family:Arial,sans-serif;font-size:21px;color:#111827;line-height:1.4;">' +
+    '<div style="font-size:21px;font-family:Arial,sans-serif;margin-bottom:20px;">' +
+    '<p style="margin:0 0 3px 0;font-size:21px;"><b>Para:</b> '+mailEsc(para)+'</p>' +
+    '<p style="margin:0 0 3px 0;font-size:21px;"><b>C/c:</b> '+coordTxt+', '+mailEsc(MAIL_CC_TEXTO)+'</p>' +
+    '<p style="margin:0 0 14px 0;font-size:21px;"><b>De:</b> '+mailEsc(MAIL_FIRMA)+'</p>' +
+    '<p style="'+P+'">'+saludo+',</p>' +
+    '<p style="margin:0;font-size:21px;">Como complemento al QCC Expansión Tiendas Mercadona Online, adjuntamos la siguiente tabla con todos los movimientos derivados del mismo.</p>' +
+    '</div>' + tabla +
+    '<div style="font-size:21px;font-family:Arial,sans-serif;margin-top:20px;">' +
+    (info.pdfs.length ? '<p style="'+P+'">Adjuntamos también la documentación necesaria para poder ejecutar los movimientos.</p>' : '') +
+    '<p style="'+P+'">Cualquier duda la pueden ver los Coordinadores de Planta con mi colaborador Alfredo Gimeno: Propietario Planificación del Servicio Mercadona Online <em>(extensión 28193)</em>.</p>' +
+    '<p style="margin:0 0 4px 0;font-size:21px;">Gracias de antemano,</p>' +
+    '<p style="margin:0;font-size:21px;">'+mailEsc(MAIL_FIRMA)+'.</p>' +
+    '</div></body></html>';
+}
+
+function mailCuerpoTexto(info, saludo){
+  var lineas = info.filas.map(function(r){ return MAIL_COLS.map(function(c){ return String(getVal(r,c)).replace(/\n/g,' | '); }).join('\t'); });
+  return saludo + ',\n\nComo complemento al QCC Expansión Tiendas Mercadona Online, adjuntamos la siguiente tabla con todos los movimientos derivados del mismo.\n\n' +
+    MAIL_COLS.map(function(c){ return c.label; }).join('\t') + '\n' + lineas.join('\n') + '\n\n' +
+    (info.pdfs.length ? 'Adjuntamos también la documentación necesaria para poder ejecutar los movimientos.\n\n' : '') +
+    'Cualquier duda la pueden ver los Coordinadores de Planta con mi colaborador Alfredo Gimeno: Propietario Planificación del Servicio Mercadona Online (extensión 28193).\n\nGracias de antemano,\n' + MAIL_FIRMA + '.';
+}
+
+// ── .eml "sin enviar" (Outlook clásico lo abre como borrador editable) ──
+function mailBytesB64(bytes){
+  var bin = '', CH = 0x8000;
+  for(var i=0; i<bytes.length; i+=CH){ bin += String.fromCharCode.apply(null, bytes.subarray(i, i+CH)); }
+  return btoa(bin);
+}
+function mailB64Utf8(s){ return mailBytesB64(new TextEncoder().encode(s)); }
+function mailWrap76(s){ return s.replace(/.{1,76}/g, '$&\r\n'); }
+function mailMimeWord(s){ return /^[\x20-\x7e]*$/.test(s) ? s : '=?UTF-8?B?' + mailB64Utf8(s) + '?='; }
+
+async function mailBuildEml(info){
+  var cab = ['X-Unsent: 1', 'To: '+info.to, 'Cc: '+info.cc.join(', '), 'Bcc: '+MAIL_CCO_FIJOS.join(', '),
+             'Subject: '+mailMimeWord(info.asunto), 'MIME-Version: 1.0'];
+  var cuerpo = 'Content-Type: text/html; charset="utf-8"\r\nContent-Transfer-Encoding: base64\r\n\r\n' + mailWrap76(mailB64Utf8(info.html));
+  if(!info.pdfs.length) return cab.join('\r\n') + '\r\n' + cuerpo;
+  var B = '----=_cambios_' + Date.now().toString(36);
+  cab.push('Content-Type: multipart/mixed; boundary="'+B+'"');
+  var out = cab.join('\r\n') + '\r\n\r\n--' + B + '\r\n' + cuerpo;
+  for(var i=0; i<info.pdfs.length; i++){
+    var f = info.pdfs[i], buf = new Uint8Array(await f.arrayBuffer()), fn = mailMimeWord(f.name).replace(/"/g,'');
+    out += '\r\n--' + B + '\r\nContent-Type: application/pdf; name="'+fn+'"\r\nContent-Transfer-Encoding: base64\r\nContent-Disposition: attachment; filename="'+fn+'"\r\n\r\n' + mailWrap76(mailBytesB64(buf));
+  }
+  return out + '\r\n--' + B + '--\r\n';
+}
+
+async function mailDescargarEml(info){
+  var eml = await mailBuildEml(info);
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([eml], {type:'message/rfc822'}));
+  a.download = info.asunto.replace(/[\\/:*?"<>|]/g,'_') + '.eml';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 5000);
+}
+
+// ── Copiar cuerpo con formato + abrir correo nuevo con destinatarios y asunto ──
+async function mailCopiarYAbrir(info){
+  var ok = false;
+  try{
+    if(navigator.clipboard && window.ClipboardItem){
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html':  new Blob([info.html],  {type:'text/html'}),
+        'text/plain': new Blob([info.texto], {type:'text/plain'})
+      })]);
+      ok = true;
+    }
+  }catch(e){}
+  if(!ok){
+    var d = document.createElement('div');
+    d.contentEditable = 'true'; d.style.cssText = 'position:fixed;left:-9999px;top:0';
+    d.innerHTML = info.html; document.body.appendChild(d);
+    var rg = document.createRange(); rg.selectNodeContents(d);
+    var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(rg);
+    try{ ok = document.execCommand('copy'); }catch(e){}
+    sel.removeAllRanges(); d.remove();
+  }
+  var url = 'mailto:' + info.to + '?cc=' + encodeURIComponent(info.cc.join(';')) +
+            '&bcc=' + encodeURIComponent(MAIL_CCO_FIJOS.join(';')) + '&subject=' + encodeURIComponent(info.asunto);
+  window.location.href = url;
+  mailToast(ok ? 'Cuerpo copiado: pégalo en el correo nuevo (Ctrl+V)' + (info.pdfs.length ? ' y arrastra ' + info.pdfs.length + ' PDF' : '')
+               : 'No se pudo copiar el cuerpo automáticamente; usa la vista previa y cópialo a mano');
+}
+
+function mailRender(){
+  var res = mailBuildInfos();
+  var note = document.getElementById('mail-note');
+  var txt = 'Se genera un correo por zona con las <b>'+res.total+' filas visibles</b> (filtros actuales, sin las marcadas ocultas). ' +
+            'Coordinador de planta en CC: <b>cp[centro]@mercadona.es</b>. ';
+  txt += '<br>Coordinadores de zona: ' + (mailMaestraEstado==='ok' ? 'leídos de la Maestra tiendas.'
+        : mailMaestraEstado==='error' ? '<b>no se ha podido leer la Maestra tiendas</b> (motivo: '+mailEsc(mailMaestraError)+'); escríbelos a mano.'
+        : 'Maestra tiendas sin configurar (falta MAIL_MAESTRA_URL); escríbelos a mano.');
+  if(!mailPdfFiles.length) txt += '<br>No has seleccionado PDFs: los correos saldrán sin adjuntos y sin el párrafo de documentación.';
+  if(res.sinZona) txt += '<br>'+res.sinZona+' fila(s) sin zona válida se han quedado fuera.';
+  note.innerHTML = txt;
+  note.className = 'mail-note' + ((!mailPdfFiles.length || res.sinZona || mailMaestraEstado!=='ok') ? ' warn' : '');
+
+  var list = document.getElementById('mail-list');
+  if(!mailInfos.length){ list.innerHTML = '<div class="mz-meta">No hay filas visibles con zona. Revisa los filtros.</div>'; return; }
+  list.innerHTML = mailInfos.map(function(info, i){
+    return '<div class="mail-zone'+(info.avisos.length?' has-warn':'')+'">' +
+      '<div class="mz-top"><strong>Zona '+info.num+'</strong>' +
+      '<input type="text" class="mz-nombre" data-zona="'+info.num+'" placeholder="Nombre coordinador de zona" value="'+mailEsc(info.nombre)+'" title="'+(info.nombreManual?'Escrito a mano (bórralo para volver al de la Maestra)':'Leído de la Maestra tiendas; si lo cambias, manda lo que escribas')+'">' +
+      (info.nombreManual ? '<span class="mz-meta" style="color:#b45309">✎ a mano</span>' : '') +
+      '<span class="mz-meta">'+info.filas.length+' fila(s) · '+info.nCentros+' centro(s)</span>' +
+      '<div class="mz-actions">' +
+        '<button class="btn" data-act="prev" data-i="'+i+'">👁 Vista previa</button>' +
+        '<button class="btn" data-act="copy" data-i="'+i+'" title="Abre un correo nuevo con destinatarios y asunto, y copia el cuerpo para pegarlo">📋 Copiar y abrir</button>' +
+        '<button class="btn excel" data-act="eml" data-i="'+i+'" title="Outlook clásico lo abre como borrador">⬇ .eml</button>' +
+      '</div></div>' +
+      '<div class="mz-subj">'+mailEsc(info.asunto)+'</div>' +
+      '<div class="mz-meta"><b>Para:</b> '+info.to+' &nbsp; <b>CC:</b> '+mailEsc(info.cc.join('; '))+'</div>' +
+      '<div class="mz-meta"><b>Adjuntos:</b> '+(info.pdfs.length ? info.pdfs.map(function(f){ return mailEsc(f.name); }).join(', ') : 'ninguno')+'</div>' +
+      (info.avisos.length ? '<div class="mz-warn">'+info.avisos.map(function(a){ return '<div>'+mailEsc(a)+'</div>'; }).join('')+'</div>' : '') +
+    '</div>';
+  }).join('');
+
+  list.querySelectorAll('.mz-nombre').forEach(function(inp){
+    inp.addEventListener('change', function(){
+      var z = inp.dataset.zona, v = inp.value.trim();
+      if(v) mailNombresZona[z] = v; else delete mailNombresZona[z];
+      mailSaveNombres(); mailRender();
+    });
+  });
+  list.querySelectorAll('button[data-act]').forEach(function(b){
+    b.addEventListener('click', async function(){
+      var info = mailInfos[+b.dataset.i];
+      if(b.dataset.act === 'prev'){
+        document.getElementById('mail-preview').style.display = 'block';
+        document.getElementById('mail-preview-title').textContent = info.asunto;
+        document.getElementById('mail-preview-frame').srcdoc = info.html;
+        document.getElementById('mail-preview').scrollIntoView({behavior:'smooth'});
+      } else if(b.dataset.act === 'copy'){
+        await mailCopiarYAbrir(info);
+      } else {
+        b.disabled = true; try{ await mailDescargarEml(info); } finally { b.disabled = false; }
+      }
+    });
+  });
+}
+
+function mailSetPdfs(files){
+  mailPdfFiles = Array.prototype.filter.call(files||[], function(f){ return /\.pdf$/i.test(f.name); });
+  document.getElementById('mail-pdf-status').textContent = mailPdfFiles.length ? (mailPdfFiles.length+' PDF seleccionados') : 'Sin PDFs seleccionados';
+  mailRender();
+}
+
+document.getElementById('btn-mail').onclick = async function(){
+  mailLoadNombres();
+  await mailCargarMaestra();
+  await mailPrepararCarpeta();
+  document.getElementById('mail-preview').style.display = 'none';
+  document.getElementById('mail-modal').style.display = 'flex';
+  mailRender();
+};
+document.getElementById('mail-close').onclick = function(){ document.getElementById('mail-modal').style.display = 'none'; };
+document.getElementById('mail-preview-close').onclick = function(){ document.getElementById('mail-preview').style.display = 'none'; };
+document.getElementById('mail-modal').addEventListener('click', function(e){ if(e.target.id === 'mail-modal') e.target.style.display = 'none'; });
+// ── Carpeta de PDFs recordada entre sesiones (Edge/Chrome) ──
+var MAIL_FS_OK = typeof window.showDirectoryPicker === 'function';
+var mailDirHandle = null;
+function mailIdb(){
+  return new Promise(function(res, rej){
+    var rq = indexedDB.open('cambios_mail', 1);
+    rq.onupgradeneeded = function(){ rq.result.createObjectStore('kv'); };
+    rq.onsuccess = function(){ res(rq.result); };
+    rq.onerror = function(){ rej(rq.error); };
+  });
+}
+async function mailIdbGet(k){
+  var db = await mailIdb();
+  return new Promise(function(res){ var rq = db.transaction('kv').objectStore('kv').get(k); rq.onsuccess = function(){ res(rq.result); }; rq.onerror = function(){ res(null); }; });
+}
+async function mailIdbSet(k, v){
+  var db = await mailIdb();
+  return new Promise(function(res){ var tx = db.transaction('kv','readwrite'); tx.objectStore('kv').put(v, k); tx.oncomplete = function(){ res(); }; tx.onerror = function(){ res(); }; });
+}
+async function mailLeerCarpeta(handle){
+  var files = [];
+  async function recorrer(dir){
+    for await (var entry of dir.values()){
+      if(entry.kind === 'file' && /\.pdf$/i.test(entry.name)) files.push(await entry.getFile());
+      else if(entry.kind === 'directory') await recorrer(entry);
+    }
+  }
+  await recorrer(handle);
+  return files;
+}
+async function mailUsarHandle(handle){
+  var perm = await handle.queryPermission({mode:'read'});
+  if(perm !== 'granted') perm = await handle.requestPermission({mode:'read'});
+  if(perm !== 'granted'){ mailToast('Sin permiso para leer la carpeta'); return; }
+  document.getElementById('mail-pdf-status').textContent = 'Leyendo carpeta…';
+  mailSetPdfs(await mailLeerCarpeta(handle));
+  document.getElementById('mail-pdf-status').textContent = mailPdfFiles.length + ' PDF en "' + handle.name + '"';
+}
+async function mailPrepararCarpeta(){
+  if(!MAIL_FS_OK){
+    document.getElementById('mail-pdf-pick').style.display = 'none';
+    document.getElementById('mail-pdf-dir-lbl').style.display = '';
+    return;
+  }
+  try{ mailDirHandle = await mailIdbGet('pdfDir'); }catch(e){ mailDirHandle = null; }
+  var reuse = document.getElementById('mail-pdf-reuse');
+  if(mailDirHandle){
+    reuse.style.display = '';
+    reuse.textContent = '📂 Usar "' + mailDirHandle.name + '"';
+    document.getElementById('mail-pdf-pick').textContent = '📁 Cambiar carpeta';
+    // Si el permiso sigue vivo en esta sesión, la lee sin preguntar
+    try{ if(!mailPdfFiles.length && await mailDirHandle.queryPermission({mode:'read'}) === 'granted') await mailUsarHandle(mailDirHandle); }catch(e){}
+  }
+}
+document.getElementById('mail-pdf-pick').onclick = async function(){
+  try{
+    var h = await window.showDirectoryPicker({id:'pdfs_mapas', mode:'read'});
+    mailDirHandle = h;
+    try{ await mailIdbSet('pdfDir', h); }catch(e){}
+    await mailUsarHandle(h);
+    await mailPrepararCarpeta();
+  }catch(e){ if(e && e.name !== 'AbortError'){ console.error(e); mailToast('No se pudo abrir la carpeta'); } }
+};
+document.getElementById('mail-pdf-reuse').onclick = async function(){
+  if(!mailDirHandle) return;
+  try{ await mailUsarHandle(mailDirHandle); }
+  catch(e){ console.error(e); mailToast('No se pudo leer la carpeta guardada; elígela de nuevo'); }
+};
+
+document.getElementById('mail-pdf-dir').onchange = function(e){ mailSetPdfs(e.target.files); e.target.value = ''; };
+document.getElementById('mail-pdf-files').onchange = function(e){ mailSetPdfs(e.target.files); e.target.value = ''; };
+document.getElementById('mail-all-eml').onclick = async function(){
+  if(!mailInfos.length) return;
+  var faltan = mailInfos.filter(function(i){ return i.avisos.length; }).length;
+  if(!confirm('Se van a descargar '+mailInfos.length+' archivos .eml.' + (faltan ? '\n\n'+faltan+' zona(s) tienen avisos pendientes.' : '') + '\n\n¿Continuar?')) return;
+  var btn = this; btn.disabled = true;
+  try{
+    for(var i=0; i<mailInfos.length; i++){
+      await mailDescargarEml(mailInfos[i]);
+      await new Promise(function(r){ setTimeout(r, 400); });
+    }
+  } finally { btn.disabled = false; }
 };
 </script>
 </body>
