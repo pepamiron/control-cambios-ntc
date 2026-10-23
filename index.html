@@ -61,6 +61,8 @@ body.panel-oculto #banda-filtros,body.panel-oculto #banda-acciones{display:none}
 .btn:hover{background:#e5e7eb}
 .controls .btn{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px;border-radius:6px;font-size:11.5px;font-weight:500;font-family:inherit;border:1px solid #d6dbd8;background:#fff;color:#374151;text-decoration:none;transition:background .1s,border-color .1s}
 .controls .btn:hover{background:#f3f5f4;border-color:#c3cac6}
+.btn.link-ext{background:#fff;color:#475569;border-color:#cbd5e1;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
+.btn.link-ext:hover{background:#f1f5f9;color:#1e293b;border-color:#94a3b8}
 .btn.pa-draft{background:#1e40af;color:#fff;border-color:#1e3a8a;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
 .btn.pa-draft:hover{background:#1e3a8a}
 .btn.pa-send{background:#fff;color:#b91c1c;border-color:#fca5a5;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:4px}
@@ -322,7 +324,14 @@ tr.row-hidden .hide-btn{border-color:#a78bfa;background:#ddd6fe;color:#7c3aed;}
       <div class="grp">
         <span class="grp-lbl">Datos</span>
         <button class="btn ghost" id="btn-update" style="display:none" title="Sustituir por un CSV nuevo manteniendo la sesión"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg> Actualizar CSV</button>
-        <a class="btn meta" href="https://metabase.prod.monline/question/32892-control-de-cambios" target="_blank" title="Abrir consulta en Metabase"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg> Metabase</a>
+        <a class="btn meta" href="https://metabase.prod.monline/question/32892-control-de-cambios" target="_blank" title="Consulta 32892: el CSV de esta tabla"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg> Metabase · cambios</a>
+      </div>
+      <div class="sep"></div>
+      <div class="grp">
+        <span class="grp-lbl">Enlaces</span>
+        <a class="btn link-ext" href="https://metabase.prod.monline/question/33813-consulta-areas-reparto-para-generar-mapas-pdf?mes=&amp;tipo_centro=" target="_blank" rel="noopener" title="Consulta 33813: áreas de reparto para generar los mapas en PDF"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg> Metabase · mapas</a>
+        <a class="btn link-ext" href="https://pepamiron.github.io/Oferta-planificacion/" target="_blank" rel="noopener" title="Oferta NTC · Calendarios por tienda: ahí indicas las tiendas para generar los PDF de planificación"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg> Calendarios Oferta</a>
+        <a class="btn link-ext" href="https://mercadona365-my.sharepoint.com/:f:/r/personal/pmiron_mercadona_es/Documents/Control%20de%20Cambios?d=w80b1d3e9eaaa4884b48f5267ed6d2011&amp;csf=1&amp;web=1&amp;e=9IGk3T" target="_blank" rel="noopener" title="Carpeta de SharePoint con la documentación de Control de Cambios"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Carpeta</a>
       </div>
       <div class="grp out">
         <span class="grp-lbl">Salida</span>
