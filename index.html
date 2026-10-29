@@ -391,6 +391,7 @@ async function loadOverrides(){
     if(!res.ok) throw new Error('HTTP ' + res.status);
     var data = await res.json();
     overrides = (data.record && data.record.overrides) || {};
+    migrarModeloATamano();
     setSyncStatus('sincronizado', '#86efac');
   }catch(e){
     console.error('JSONBin load error', e);
@@ -559,10 +560,10 @@ var MOVIMIENTO_OPTIONS = [
   'NUEVA IMPLANTACIÓN',
   'CIERRE DEL SERVICIO',
   'CIERRE X REFORMA',
-  'AMPLIACIÓN MODELO + REORGANIZACIÓN CCPP',
-  'AMPLIACIÓN MODELO',
-  'BAJADA MODELO + REORGANIZACIÓN CCPP',
-  'BAJADA MODELO',
+  'AMPLIACIÓN TAMAÑO + REORGANIZACIÓN CCPP',
+  'AMPLIACIÓN TAMAÑO',
+  'BAJADA TAMAÑO + REORGANIZACIÓN CCPP',
+  'BAJADA TAMAÑO',
   'REORGANIZACIÓN CCPP'
 ];
 
@@ -571,14 +572,14 @@ var MOVIMIENTO_OPTIONS = [
 // en el mismo año — esa la calcula solo la query. Revisa siempre tras aceptar
 // la sugerencia).
 var ARCHIVO_POR_MOVIMIENTO = {
-  'AMPLIACIÓN MODELO': 'GUÍA CAMBIO DE MODELO (Ruta: Biblioteca / Métodos / NTC+NSD / Mantenimiento / 02 Guía cambio de escenario NTC-NSD)',
-  'AMPLIACIÓN MODELO + REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO\nGUÍA CAMBIO DE MODELO (Ruta: Biblioteca / Métodos / NTC+NSD / Mantenimiento / 02 Guía cambio de escenario NTC-NSD)',
+  'AMPLIACIÓN TAMAÑO': 'GUÍA CAMBIO DE TAMAÑO (Ruta: Biblioteca / Métodos / NTC / Mantenimiento / 02 Guía cambio de tamaño NTC)',
+  'AMPLIACIÓN TAMAÑO + REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO\nGUÍA CAMBIO DE TAMAÑO (Ruta: Biblioteca / Métodos / NTC / Mantenimiento / 02 Guía cambio de tamaño NTC)',
   'NUEVA IMPLANTACIÓN': 'MAPA ÁREA DE SERVICIO\nPLANIFICACIÓN ANUAL',
   'APERTURA COLMENA': 'MAPA ÁREA DE SERVICIO',
   'APERTURA TRAS REFORMA': 'MAPA ÁREA DE SERVICIO',
   'REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO',
-  'BAJADA MODELO + REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO',
-  'BAJADA MODELO': '',
+  'BAJADA TAMAÑO + REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO',
+  'BAJADA TAMAÑO': '',
   'CIERRE DEL SERVICIO': '',
   'CIERRE X REFORMA': ''
 };
@@ -610,6 +611,36 @@ function rowKey(row){
 function normTexto(s){
   return String(s==null?'':s).replace(/\u00a0/g,' ').replace(/\s+/g,' ').trim();
 }
+// Migración MODELO -> TAMAÑO (y ruta de la guía sin NSD) de las correcciones
+// ya guardadas.
+// Las correcciones guardan el texto literal del movimiento, así que sin esto
+// las filas corregidas antes del cambio seguirían mostrando "MODELO" y
+// convivirían con las nuevas en "TAMAÑO" dentro de la misma tabla.
+// Se ejecuta sola al cargar y se guarda solo si ha cambiado algo.
+function migrarModeloATamano(){
+  var n=0;
+  Object.keys(overrides).forEach(function(k){
+    var o=overrides[k];
+    Object.keys(o).forEach(function(campo){
+      var v=o[campo];
+      if(typeof v!=='string') return;
+      if(v.indexOf('MODELO')===-1 && v.indexOf('NSD')===-1) return;
+      o[campo]=v.replace(/AMPLIACIÓN MODELO/g,'AMPLIACIÓN TAMAÑO')
+                .replace(/BAJADA MODELO/g,'BAJADA TAMAÑO')
+                .replace(/GUÍA CAMBIO DE MODELO/g,'GUÍA CAMBIO DE TAMAÑO')
+                // La biblioteca retiró NSD y renombró el documento
+                .replace(/Biblioteca \/ Métodos \/ NTC\+NSD \/ Mantenimiento \/ 02 Guía cambio de escenario NTC-NSD/g,
+                         'Biblioteca / Métodos / NTC / Mantenimiento / 02 Guía cambio de tamaño NTC');
+      if(o[campo]!==v) n++;
+    });
+  });
+  if(n>0){
+    console.log('Correcciones migradas de MODELO a TAMAÑO:', n);
+    scheduleSaveOverrides();
+  }
+  return n;
+}
+
 function getOverride(row,field){
   var k=rowKey(row), o=overrides[k];
   return (o && o[field]!=null) ? o[field] : null;
