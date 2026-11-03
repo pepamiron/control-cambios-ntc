@@ -1368,9 +1368,12 @@ document.getElementById('btn-update').onclick=function(){fiUpdate.click();};
 
 document.getElementById('btn-export').onclick=function(){
   var rows=filtered().filter(function(r){return !hiddenRowIds.has(r.__id);});
-  var headers=COLS.map(function(c){return c.label;});
+  // El año no se exporta: la tabla de destino de Power Automate no lo lleva,
+  // así que al pegar sobraba una columna. Sigue mostrándose en pantalla.
+  var EXP_COLS=COLS.filter(function(c){return c.src!=='anio';});
+  var headers=EXP_COLS.map(function(c){return c.label;});
   var data=[headers].concat(rows.map(function(row){
-    return COLS.map(function(col){return String(getVal(row,col)).replace(/\n/g,' | ');});
+    return EXP_COLS.map(function(col){return String(getVal(row,col)).replace(/\n/g,' | ');});
   }));
 
   var ws=XLSX.utils.aoa_to_sheet(data);
@@ -1387,7 +1390,7 @@ document.getElementById('btn-export').onclick=function(){
     }
   }
   ws['!rows']=[{hpt:18}];
-  ws['!cols']=COLS.map(function(col){
+  ws['!cols']=EXP_COLS.map(function(col){
     var max=col.label.length;
     rows.slice(0,300).forEach(function(r){var v=String(getVal(r,col)).replace(/\n/g,' | ');if(v.length>max) max=v.length;});
     return {wch:Math.min(max+2,60)};
