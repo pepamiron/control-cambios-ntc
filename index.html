@@ -1002,9 +1002,22 @@ function render(){
   if(excludedCentros.length) parts.push('Excluidos: '+excludedCentros.join(', '));
 
   var visibleRows=rows.filter(function(r){return showHidden||!hiddenRowIds.has(r.__id);});
+
+  // Zonas distintas entre las filas visibles: una zona puede tener varios
+  // movimientos, así que no coincide con el número de filas.
+  var zonasSet={}, zonasLista=[];
+  visibleRows.forEach(function(r){
+    var z=String(r['zona']||'').trim();
+    if(!z || zonasSet[z]) return;
+    zonasSet[z]=1; zonasLista.push(z);
+  });
+  // Orden natural: así Z9 va antes que Z10 aunque falte el cero delante
+  zonasLista.sort(function(a,b){ return a.localeCompare(b,'es',{numeric:true}); });
+
   var nCorrecciones=Object.keys(overrides).length;
   var statsEl=document.getElementById('stats');
-  statsEl.innerHTML='<span class="stats-count">'+visibleRows.length+'</span>&nbsp;de '+total+' filas'+(parts.length?' &nbsp;·&nbsp; '+parts.join(' · '):'')+(hiddenRowIds.size>0?' &nbsp;·&nbsp; <span style="color:#7c3aed;font-weight:600">'+hiddenRowIds.size+' marcadas</span>':'')+(nCorrecciones>0?' &nbsp;·&nbsp; <span class="stats-ovr" id="stats-ovr" title="Pulsa para ver solo estas filas" style="color:#b45309;font-weight:600">'+nCorrecciones+' filas corregidas</span>':'');
+  statsEl.innerHTML='<span class="stats-count">'+visibleRows.length+'</span>&nbsp;de '+total+' filas'+
+    (zonasLista.length?' &nbsp;·&nbsp; <span class="stats-count" title="'+zonasLista.join(', ')+'">'+zonasLista.length+'</span>&nbsp;zona'+(zonasLista.length===1?'':'s'):'')+(parts.length?' &nbsp;·&nbsp; '+parts.join(' · '):'')+(hiddenRowIds.size>0?' &nbsp;·&nbsp; <span style="color:#7c3aed;font-weight:600">'+hiddenRowIds.size+' marcadas</span>':'')+(nCorrecciones>0?' &nbsp;·&nbsp; <span class="stats-ovr" id="stats-ovr" title="Pulsa para ver solo estas filas" style="color:#b45309;font-weight:600">'+nCorrecciones+' filas corregidas</span>':'');
 
   var so=document.getElementById('stats-ovr');
   if(so) so.onclick=toggleSoloCorregidas;
