@@ -567,14 +567,13 @@ var MOVIMIENTO_OPTIONS = [
   'REORGANIZACIÓN CCPP'
 ];
 
-// Sugerencia de ARCHIVOS por movimiento (simplificada: no reproduce la
-// excepción de "NUEVA IMPLANTACIÓN" con modelo 15/30 sin ampliación posterior
-// en el mismo año — esa la calcula solo la query. Revisa siempre tras aceptar
-// la sugerencia).
+// Sugerencia de ARCHIVOS por movimiento. Coincide con el CASE de la query:
+// desde que PLANIFICACIÓN ANUAL dejó de enviarse con el Control de Cambios
+// no hay excepciones por tamaño. Revisa siempre tras aceptar la sugerencia.
 var ARCHIVO_POR_MOVIMIENTO = {
   'AMPLIACIÓN TAMAÑO': 'GUÍA CAMBIO DE TAMAÑO (Ruta: Biblioteca / Métodos / NTC / Mantenimiento / 02 Guía cambio de tamaño NTC)',
   'AMPLIACIÓN TAMAÑO + REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO\nGUÍA CAMBIO DE TAMAÑO (Ruta: Biblioteca / Métodos / NTC / Mantenimiento / 02 Guía cambio de tamaño NTC)',
-  'NUEVA IMPLANTACIÓN': 'MAPA ÁREA DE SERVICIO\nPLANIFICACIÓN ANUAL',
+  'NUEVA IMPLANTACIÓN': 'MAPA ÁREA DE SERVICIO',
   'APERTURA COLMENA': 'MAPA ÁREA DE SERVICIO',
   'APERTURA TRAS REFORMA': 'MAPA ÁREA DE SERVICIO',
   'REORGANIZACIÓN CCPP': 'MAPA ÁREA DE SERVICIO',
